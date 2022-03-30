@@ -1,47 +1,54 @@
 -- CESIL interpreter top level
 
--- TODO check all these are needed
 import System.Environment
-import System.IO
-import System.IO.Error
 import Control.Exception
-
-import System.Exit
+import Control.Monad.Except
 
 main :: IO ()
-main = do
-  args <- getArgs
-  filename <- case parseArgs args of
-        Left err -> die (err)
-        Right f -> return f
+main = handleErrors <=< runExceptT $ do
+  args <- liftIO getArgs
+  filename <- parseArgs args
+  source <- readSource filename
+  res <- process source
+  liftIO $ printReport filename res
 
-  contents <- readSource filename
 
-  let l = length contents
-  putStrLn $ "Done: " ++ show l
+-- Report an error if present.
+handleErrors :: Either String () -> IO ()
+handleErrors (Left err) = putStrLn $ "ERROR: " ++ err
+handleErrors (Right _) = return ()
 
-readSource :: String -> IO String
-readSource filename = do
-  putStrLn $ "Process " ++ filename
-  contents <- readFile filename `catch` handler
-  return contents
-
-handler :: IOError -> IO String
-handler e
-  | isDoesNotExistError e = dieErr e "File not found"
-  | isAlreadyInUseError e = dieErr e "File in use"
-  | isEOFError e = dieErr e "Unexpected end of file"
-  | isPermissionError e = dieErr e "Permission error"
-  | otherwise = ioError e
-  where dieErr e m =
-          case ioeGetFileName e of Just path -> die $ m ++ ": " ++ path
-                                   Nothing -> die $ m ++ " - filename not known."
 
 -- Parse the command line and return the filename or an error
--- TODO improve this
-parseArgs :: [String] -> Either String String
+parseArgs :: [String] -> ExceptT String IO  String
 parseArgs args
-  | length args == 0 = Left "ERROR: No filename specified."
-  | length (head args) == 0 = Left "ERROR: Empty filename."
-  | length args > 1 = Left "ERROR: Too many parameters"
-  | otherwise = Right $ head args
+  | length args == 0 = throwError "No filename specified."
+  | length (head args) == 0 = throwError "Empty filename."
+  | length args > 1 = throwError "Too many parameters"
+  | otherwise = return $ head args
+
+
+-- Open and read in the source file.
+readSource :: String -> ExceptT String IO String
+readSource filename = ExceptT $ do
+  putStrLn $ "Loading: " ++ filename
+  res <- try $ readFile filename :: IO (Either SomeException String)
+  case res of
+    Left err -> return . Left . show $ err
+    Right contents -> return $ Right contents
+
+
+-- TODO dummy code
+process :: String -> ExceptT String IO String
+process contents =
+  let l = length contents
+  in if l == 0
+     then throwError "Empty file"
+     else return $ "Length: " ++ show l
+
+
+-- TODO dummy code
+printReport :: String -> String -> IO ()
+printReport filename res = do
+  putStrLn $ "Report for " ++ filename
+  putStrLn res
