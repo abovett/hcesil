@@ -1,6 +1,6 @@
-START
-        PRINT   "Hello"
-        JUMP    START
+START    
+        PRINT   "Hello"   
+        JUMP    START   
         %
-        1
-        2
+        1     
+        2    
