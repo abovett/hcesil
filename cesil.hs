@@ -3,13 +3,16 @@
 import System.Environment
 import Control.Exception
 import Control.Monad.Except
+import qualified Data.Map as Map
+
+import ScanSource
 
 main :: IO ()
 main = handleErrors <=< runExceptT $ do
   args <- liftIO getArgs
   filename <- parseArgs args
   source <- readSource filename
-  res <- process source
+  res <- compileAndRun source
   liftIO $ printReport filename res
 
 
@@ -38,13 +41,11 @@ readSource filename = ExceptT $ do
     Right contents -> return $ Right contents
 
 
--- TODO dummy code
-process :: String -> ExceptT String IO String
-process contents =
-  let l = length contents
-  in if l == 0
-     then throwError "Empty file"
-     else return $ "Length: " ++ show l
+-- "Compile" and run the CESIL program.
+compileAndRun :: String -> ExceptT String IO String
+compileAndRun source =
+  let ss = scanSource source
+  in return $ show ss
 
 
 -- TODO dummy code
