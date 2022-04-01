@@ -6,6 +6,7 @@ import Control.Monad.Except
 import qualified Data.Map as Map
 
 import ScanSource
+import Compile
 
 main :: IO ()
 main = handleErrors <=< runExceptT $ do
@@ -44,8 +45,9 @@ readSource filename = ExceptT $ do
 -- "Compile" and run the CESIL program.
 compileAndRun :: String -> ExceptT String IO String
 compileAndRun source =
-  let ss = scanSource source
-  in return $ show ss
+  let (cl, dl) = scanSource source
+      jumpTable = makeJumpTable cl
+  in return $ (show cl) ++ "\n" ++ (show dl) ++ "\n" ++ (show jumpTable)
 
 
 -- TODO dummy code

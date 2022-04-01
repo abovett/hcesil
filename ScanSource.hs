@@ -2,15 +2,11 @@
 
 module ScanSource
   ( scanSource
-  , ScannedSource (ScannedSource)
   , CodeLine (CodeLine)
   , DataLine (DataLine)
   ) where
 
 import Data.Char
-
--- Type to contain the sorce code after scanning/lexing
-data ScannedSource = ScannedSource [CodeLine] Bool [DataLine] deriving (Show)
 
 -- A scanned line of source comprising line number, label, instruction
 -- and operand.
@@ -19,14 +15,16 @@ data CodeLine = CodeLine Integer String String String deriving (Show)
 -- A scanned data line with line number
 data DataLine = DataLine Integer String deriving (Show)
 
+-- Source scanning "accumulator" for fold
+data ScannedSource = ScannedSource [CodeLine] Bool [DataLine] deriving (Show)
 
--- Scan the source lines and return a ScannedSource item
-scanSource :: String -> ScannedSource
+-- Scan the source lines and return the dode and data line items
+scanSource :: String -> ([CodeLine], [DataLine])
 scanSource source = let
   numberedLines = zip [1..] $ lines source
   start = ScannedSource [] False []
   ScannedSource cl pcount dl = foldl ssBuilder start numberedLines
-  in ScannedSource (reverse cl) pcount (reverse dl)
+  in ((reverse cl), (reverse dl))
 
 -- "Accumulator" to build the ScannedSource item
 ssBuilder :: ScannedSource -> (Integer, String) -> ScannedSource
