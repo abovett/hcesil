@@ -45,9 +45,10 @@ readSource filename = ExceptT $ do
 -- "Compile" and run the CESIL program.
 compileAndRun :: String -> ExceptT String IO String
 compileAndRun source =
-  let (cl, dl) = scanSource source
-      jumpTable = makeJumpTable cl
-  in return $ (show cl) ++ "\n" ++ (show dl) ++ "\n" ++ (show jumpTable)
+  let (codeLines, dataLines) = scanSource source
+      jumpTable = makeJumpTable codeLines
+      program = compile codeLines jumpTable
+  in return $ (show program) ++ "\n" ++ (show dataLines) ++ "\n" ++ (show jumpTable)
 
 
 -- TODO dummy code
