@@ -48,7 +48,14 @@ compileAndRun source =
   let (codeLines, dataLines) = scanSource source
       jumpTable = makeJumpTable codeLines
       program = compile codeLines jumpTable
-  in return $ (show program) ++ "\n" ++ (show dataLines) ++ "\n" ++ (show jumpTable)
+      fp = replace ',' '\n' $ show program
+      fd = replace ',' '\n' $ show dataLines
+      fj = replace ',' '\n' $ show jumpTable
+  in return $ fp ++ "\n\n" ++ fd ++ "\n\n" ++ fj
+
+-- TODO debug helper code
+replace :: Eq a => a -> a -> [a] -> [a]
+replace a b = map $ \c -> if c == a then b else c
 
 
 -- TODO dummy code

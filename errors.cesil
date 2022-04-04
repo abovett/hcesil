@@ -1,15 +1,15 @@
-*       A simple program
         LOAD    0
-        STORE   ACC
+        STORE   1
 LOOP
         IN
         JINEG   END
         ADD     ACC
         STORE   ACC
-        JUMP    LOOP
+        JUMP
 
-* End of the program
-END     LOAD    ACC
+        UNKNOWN
+
+END     LOAD    X Z ACC
         OUT
         LINE
         HALT

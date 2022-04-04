@@ -17,8 +17,8 @@ import ScanSource
 type Address = Integer
 type JumpTable = Map.Map String Address
 
+
 -- Create the jump table
--- TODO does this belong here?
 makeJumpTable :: [CodeLine] -> JumpTable
 makeJumpTable cl = foldr jtBuilder Map.empty $ zip [0 :: Address ..] cl
   where jtBuilder (_, CodeLine _ "" _ _) jt = jt
@@ -79,7 +79,6 @@ compile cl jt = foldr (\ c prog -> compIns c jt : prog) [] cl
 
 
 -- Compile a single instruction
--- TODO improve error reporting
 compIns :: CodeLine -> JumpTable -> Either String Instruction
 compIns (CodeLine lineNo _ "" _) jumpTable =
   Right $ Instruction lineNo NoOp NoOperand
@@ -87,15 +86,15 @@ compIns (CodeLine lineNo _ instr pstr) jumpTable =
   case Map.lookup instr instructionDefs of
     Just (opcode, parser) -> case parser pstr jumpTable of
       Right opa -> Right $ Instruction lineNo opcode opa
-      Left err -> Left $ "Line " ++ show lineNo ++ ": " ++ err
-    Nothing -> Left $ "Line " ++ show lineNo ++ ": Unknown instruction: " ++ instr
-
+      Left err -> composeError err
+    Nothing -> composeError $ "Unknown instruction: " ++ instr
+  where composeError err = Left $ "Line " ++ show lineNo ++ ": " ++ err
 
 -- Define operand parsers
 
 parseNoOperand :: String -> JumpTable -> Either String Operand
 parseNoOperand "" _ = Right NoOperand
-parseNoOperand _ _ = Left "Unexpected parameter"
+parseNoOperand p _ = Left $ "Unexpected operand: " ++ p
 
 
 parseValueOperand :: String -> JumpTable -> Either String Operand
@@ -106,14 +105,14 @@ parseValueOperand p _
       Nothing -> Left $ "Invalid number: " ++ p
   | otherwise = if isValidSymbolName p
                 then Right $ ValueOperand $ Right p
-                else Left "Invalid symbol name"
+                else Left $ "Invalid symbol name: " ++ p
 
 
 parseSymbolOperand :: String -> JumpTable -> Either String Operand
 parseSymbolOperand "" _ = Left "Missing parameter"
 parseSymbolOperand p _ = if isValidSymbolName p
                          then Right $ SymbolOperand p
-                         else Left "Invalid symbol name"
+                         else Left $ "Invalid symbol name: " ++ p
 
 
 parseAddrOperand :: String -> JumpTable -> Either String Operand
