@@ -15,5 +15,8 @@ END     LOAD    X Z ACC
         HALT
         %
         1
+        XC
         2
+
+        2 3 4
         -1

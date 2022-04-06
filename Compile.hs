@@ -2,13 +2,14 @@
 -- executable representation.
 
 module Compile
-  ( makeJumpTable
-  , compile
+  ( compile
+  , Instruction
   ) where
 
 import qualified Data.Map as Map
 import Data.Char
 import Text.Read
+import Data.Either
 
 import ScanSource
 
@@ -16,16 +17,6 @@ import ScanSource
 -- Define some types
 type Address = Integer
 type JumpTable = Map.Map String Address
-
-
--- Create the jump table
-makeJumpTable :: [CodeLine] -> JumpTable
-makeJumpTable cl = foldr jtBuilder Map.empty $ zip [0 :: Address ..] cl
-  where jtBuilder (_, CodeLine _ "" _ _) jt = jt
-        jtBuilder (n, CodeLine lineNo label _ _) jt = Map.insert label n jt
-
-
--- Define type for a compiled instruction
 data Instruction = Instruction LineNo OpCode Operand deriving (Show)
 
 -- Define instructions
@@ -73,22 +64,43 @@ instructionDefs = Map.fromList
   ]
 
 
+-- "Compile" the program
+compile :: String -> Either [String] ([Instruction], [Integer])
+compile source =
+  let (codeLines, dataLines) = scanSource source
+      jumpTable = makeJumpTable codeLines
+      (pErrors, code) = partitionEithers $ compileCode codeLines jumpTable
+      (dErrors, dataVals) = partitionEithers $ getDataValues dataLines
+      errors = pErrors ++ dErrors
+  in if null errors
+     then Right (code, dataVals)
+     else Left errors
+
+
+-- Create the jump table
+makeJumpTable :: [CodeLine] -> JumpTable
+makeJumpTable cl = foldr jtBuilder Map.empty $ zip [0 :: Address ..] cl
+  where jtBuilder (_, CodeLine _ "" _ _) jt = jt
+        jtBuilder (n, CodeLine lineNo label _ _) jt = Map.insert label n jt
+
+
 -- Compile the parsed codelines to instructions (or errors)
-compile :: [CodeLine] -> JumpTable -> [Either String Instruction]
-compile cl jt = foldr (\ c prog -> compIns c jt : prog) [] cl
+compileCode :: [CodeLine] -> JumpTable -> [Either String Instruction]
+compileCode cl jt = foldr (\ c code -> compileInst c jt : code) [] cl
 
 
 -- Compile a single instruction
-compIns :: CodeLine -> JumpTable -> Either String Instruction
-compIns (CodeLine lineNo _ "" _) jumpTable =
+compileInst :: CodeLine -> JumpTable -> Either String Instruction
+compileInst (CodeLine lineNo _ "" _) jumpTable =
   Right $ Instruction lineNo NoOp NoOperand
-compIns (CodeLine lineNo _ instr pstr) jumpTable =
+compileInst (CodeLine lineNo _ instr pstr) jumpTable =
   case Map.lookup instr instructionDefs of
     Just (opcode, parser) -> case parser pstr jumpTable of
       Right opa -> Right $ Instruction lineNo opcode opa
       Left err -> composeError err
     Nothing -> composeError $ "Unknown instruction: " ++ instr
   where composeError err = Left $ "Line " ++ show lineNo ++ ": " ++ err
+
 
 -- Define operand parsers
 
@@ -135,3 +147,11 @@ isValidSymbolName s
   | not . isAlpha . head $ s = False
   | all (\ l -> (isAlphaNum l) || (l == '_')) s = True
   | otherwise = False
+
+
+-- Convert data lines to values
+getDataValues :: [DataLine] -> [Either String Integer]
+getDataValues dl = foldr (\ d dVals -> parseData d : dVals) [] dl
+  where parseData (DataLine lineNo s) = case readMaybe s :: Maybe Integer of
+          Just v -> Right v
+          Nothing -> Left $ "Line " ++ show lineNo ++ ": " ++ "Invalid data: " ++ s

@@ -3,18 +3,20 @@
 import System.Environment
 import Control.Exception
 import Control.Monad.Except
-import qualified Data.Map as Map
+import Data.List
 
-import ScanSource
 import Compile
+
 
 main :: IO ()
 main = handleErrors <=< runExceptT $ do
   args <- liftIO getArgs
   filename <- parseArgs args
   source <- readSource filename
-  res <- compileAndRun source
-  liftIO $ printReport filename res
+  let program = compile source
+
+  -- TODO WIP
+  liftIO $ printReport filename program
 
 
 -- Report an error if present.
@@ -24,7 +26,7 @@ handleErrors (Right _) = return ()
 
 
 -- Parse the command line and return the filename or an error
-parseArgs :: [String] -> ExceptT String IO  String
+parseArgs :: [String] -> ExceptT String IO String
 parseArgs args
   | length args == 0 = throwError "No filename specified."
   | length (head args) == 0 = throwError "Empty filename."
@@ -42,24 +44,17 @@ readSource filename = ExceptT $ do
     Right contents -> return $ Right contents
 
 
--- "Compile" and run the CESIL program.
-compileAndRun :: String -> ExceptT String IO String
-compileAndRun source =
-  let (codeLines, dataLines) = scanSource source
-      jumpTable = makeJumpTable codeLines
-      program = compile codeLines jumpTable
-      fp = replace ',' '\n' $ show program
-      fd = replace ',' '\n' $ show dataLines
-      fj = replace ',' '\n' $ show jumpTable
-  in return $ fp ++ "\n\n" ++ fd ++ "\n\n" ++ fj
+-- TODO dummy code
+printReport :: String -> Either [String] ([Instruction], [Integer]) -> IO ()
+printReport filename program = do
+  let res = case program of
+        Left errors -> concat $ intersperse "\n" errors
+        Right (code, dataVals) -> let fp = replace ',' '\n' $ show code
+                                      fd = replace ',' '\n' $ show dataVals
+                                  in fp ++ "\n\n" ++ fd
+  putStrLn res
+
 
 -- TODO debug helper code
 replace :: Eq a => a -> a -> [a] -> [a]
 replace a b = map $ \c -> if c == a then b else c
-
-
--- TODO dummy code
-printReport :: String -> String -> IO ()
-printReport filename res = do
-  putStrLn $ "Report for " ++ filename
-  putStrLn res
