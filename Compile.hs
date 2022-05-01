@@ -9,6 +9,7 @@ module Compile
 import qualified Data.Map as Map
 import Data.Char
 import Text.Read
+import Data.List
 import Data.Either
 
 import ScanSource
@@ -65,7 +66,7 @@ instructionDefs = Map.fromList
 
 
 -- "Compile" the program
-compile :: String -> Either [String] ([Instruction], [Integer])
+compile :: String -> Either String ([Instruction], [Integer])
 compile source =
   let (codeLines, dataLines) = scanSource source
       jumpTable = makeJumpTable codeLines
@@ -74,7 +75,8 @@ compile source =
       errors = pErrors ++ dErrors
   in if null errors
      then Right (code, dataVals)
-     else Left errors
+     else let s = concat $ intersperse "\n" errors
+          in Left $ "Compilation failed.\n" ++ s
 
 
 -- Create the jump table

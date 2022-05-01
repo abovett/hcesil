@@ -13,7 +13,7 @@ main = handleErrors <=< runExceptT $ do
   args <- liftIO getArgs
   filename <- parseArgs args
   source <- readSource filename
-  let program = compile source
+  program <- liftEither $ compile source
 
   -- TODO WIP
   liftIO $ printReport filename program
@@ -21,7 +21,7 @@ main = handleErrors <=< runExceptT $ do
 
 -- Report an error if present.
 handleErrors :: Either String () -> IO ()
-handleErrors (Left err) = putStrLn $ "ERROR: " ++ err
+handleErrors (Left err) = putStrLn $ "*** ERROR: " ++ err
 handleErrors (Right _) = return ()
 
 
@@ -37,22 +37,18 @@ parseArgs args
 -- Open and read in the source file.
 readSource :: String -> ExceptT String IO String
 readSource filename = ExceptT $ do
-  putStrLn $ "Loading: " ++ filename
   res <- try $ readFile filename :: IO (Either SomeException String)
-  case res of
-    Left err -> return . Left . show $ err
-    Right contents -> return $ Right contents
+  return $ case res of
+    Left err -> Left . show $ err
+    Right contents -> Right contents
 
 
 -- TODO dummy code
-printReport :: String -> Either [String] ([Instruction], [Integer]) -> IO ()
-printReport filename program = do
-  let res = case program of
-        Left errors -> concat $ intersperse "\n" errors
-        Right (code, dataVals) -> let fp = replace ',' '\n' $ show code
-                                      fd = replace ',' '\n' $ show dataVals
-                                  in fp ++ "\n\n" ++ fd
-  putStrLn res
+printReport :: String -> ([Instruction], [Integer]) -> IO ()
+printReport filename (code, dataVals) = do
+  let fp = replace ',' '\n' $ show code
+      fd = replace ',' '\n' $ show dataVals
+    in putStrLn $ fp ++ "\n\n" ++ fd
 
 
 -- TODO debug helper code
