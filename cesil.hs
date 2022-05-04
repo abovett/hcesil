@@ -6,17 +6,19 @@ import Control.Monad.Except
 import Data.List
 
 import Compile
-
+import Execute
 
 main :: IO ()
 main = handleErrors <=< runExceptT $ do
   args <- liftIO getArgs
   filename <- parseArgs args
   source <- readSource filename
-  program <- liftEither $ compile source
+  (program, dataVals) <- liftEither $ compile source
+
+  liftIO $ runProgram program dataVals
 
   -- TODO WIP
-  liftIO $ printReport filename program
+  -- liftIO $ printReport filename (program, dataVals)
 
 
 -- Report an error if present.

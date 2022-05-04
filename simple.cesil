@@ -1,4 +1,6 @@
 *       A simple program
+        PRINT   "Starting"
+        LINE
         LOAD    0
         STORE   ACC
 LOOP
@@ -11,6 +13,8 @@ LOOP
 * End of the program
 END     LOAD    ACC
         OUT
+        LINE
+        PRINT   "Done"
         LINE
         HALT
         %

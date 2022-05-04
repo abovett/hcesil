@@ -3,7 +3,9 @@
 
 module Compile
   ( compile
-  , Instruction
+  , Instruction (..)
+  , OpCode (..)
+  , Operand (..)
   ) where
 
 import qualified Data.Map as Map
