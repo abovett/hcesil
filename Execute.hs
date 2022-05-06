@@ -9,10 +9,11 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.State
 import qualified Data.Map as Map
 
-import Compile ( Instruction (..)
-               , OpCode (..)
-               , Operand (..)
-               )
+import Common ( Address
+              , Instruction (..)
+              , OpCode (..)
+              , Operand (..)
+              )
 
 -- Define the computer state
 data Computer = Computer { program :: [Instruction]

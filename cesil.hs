@@ -5,6 +5,7 @@ import Control.Exception
 import Control.Monad.Except
 import Data.List
 
+import Common ( Instruction (..) )
 import Compile
 import Execute
 
@@ -14,11 +15,7 @@ main = handleErrors <=< runExceptT $ do
   filename <- parseArgs args
   source <- readSource filename
   (program, dataVals) <- liftEither $ compile source
-
   liftIO $ runProgram program dataVals
-
-  -- TODO WIP
-  -- liftIO $ printReport filename (program, dataVals)
 
 
 -- Report an error if present.
@@ -43,16 +40,3 @@ readSource filename = ExceptT $ do
   return $ case res of
     Left err -> Left . show $ err
     Right contents -> Right contents
-
-
--- TODO dummy code
-printReport :: String -> ([Instruction], [Integer]) -> IO ()
-printReport filename (code, dataVals) = do
-  let fp = replace ',' '\n' $ show code
-      fd = replace ',' '\n' $ show dataVals
-    in putStrLn $ fp ++ "\n\n" ++ fd
-
-
--- TODO debug helper code
-replace :: Eq a => a -> a -> [a] -> [a]
-replace a b = map $ \c -> if c == a then b else c

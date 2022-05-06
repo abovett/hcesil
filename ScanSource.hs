@@ -4,14 +4,13 @@ module ScanSource
   ( scanSource
   , CodeLine (CodeLine)
   , DataLine (DataLine)
-  , LineNo
   ) where
 
 import Data.Char
 
+import Common ( LineNo )
 
 -- Define some types
-type LineNo = Integer
 -- A scanned line of source comprising line number, label, instruction
 -- and operand.
 data CodeLine = CodeLine LineNo String String String deriving (Show)

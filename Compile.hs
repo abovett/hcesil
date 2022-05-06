@@ -3,50 +3,20 @@
 
 module Compile
   ( compile
-  , Instruction (..)
-  , OpCode (..)
-  , Operand (..)
   ) where
 
-import qualified Data.Map as Map
 import Data.Char
 import Text.Read
 import Data.List
 import Data.Either
+import qualified Data.Map as Map
 
+import Common
 import ScanSource
 
-
--- Define some types
-type Address = Integer
+-- Definitions
 type JumpTable = Map.Map String Address
-data Instruction = Instruction LineNo OpCode Operand deriving (Show)
 
--- Define instructions
-data OpCode = IN
-            | OUT
-            | LINE
-            | PRINT
-            | HALT
-            | LOAD
-            | STORE
-            | ADD
-            | SUBTRACT
-            | MULTIPLY
-            | DIVIDE
-            | JUMP
-            | JIZERO
-            | JINEG
-            | NoOp
-            deriving (Show)
-
--- Define operand types
-data Operand = NoOperand
-             | ValueOperand (Either Integer String)
-             | SymbolOperand String
-             | AddrOperand Address
-             | TextOperand String
-             deriving (Show)
 
 -- Relate instruction spelling, opcode, and operand types
 instructionDefs = Map.fromList
