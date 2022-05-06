@@ -33,50 +33,39 @@ runProgram pr dv = do
                       , pc = 0
                       , halted = False
                       }
-  evalStateT execute comp
+  execute comp
 
 
 -- Main execution "loop"
-execute :: StateT Computer IO ()
-execute = do
-  output <- step
-  liftIO $ putStr output
-  comp <- get
-  if halted comp
+execute :: Computer -> IO ()
+execute comp = do
+  let (comp', output) = step comp
+  putStr output
+  if halted comp'
     then return ()
-    else execute
+    else execute comp'
 
 
 -- Execute a single step/cycle
-step :: Monad m => StateT Computer m String
-step = do
-  comp <- get
-  -- TODO clean up. Can we use another Monad transformer?
-  if pc comp >= (toInteger . length . program $ comp)
-    then do put $ comp{ halted = True }
-            return $ "PC OUT OF RANGE: " ++ (show $ pc comp) ++ "\n"
-    else do let pcv = fromIntegral $ pc comp
-                Instruction lineNo opCode operand = program comp !! pcv
-            case opCode of
-              HALT -> do
-                put $ comp{ halted = True }
-                return "HALT\n"
-              LINE -> do
-                let comp' = comp{ pc = pc comp + 1 }
-                put comp'
-                return "\n"
-              PRINT -> do
-                let TextOperand s = operand
-                    comp' = comp{ pc = pc comp + 1 }
-                put comp'
-                return s
-              STORE -> do
-                let SymbolOperand s = operand
-                    comp' = comp{ pc = pc comp + 1
-                                , ram = Map.insert s (acc comp) (ram comp) }
-                put comp'
-                return "\n"
-              _ -> do
-                let comp' = comp{ pc = pc comp + 1 }
-                put comp'
-                return $ "step: PC = " ++  (show $ pc comp') ++ "\n"
+step :: Computer -> (Computer, String)
+step comp
+  | pc comp >= (toInteger . length . program $ comp) =
+    ( comp{ halted = True }
+    , "PC OUT OF RANGE: " ++ (show $ pc comp) ++ "\n"
+    )
+
+  | otherwise =
+      let pcv = fromIntegral $ pc comp
+          Instruction lineNo opCode operand = program comp !! pcv
+      in case opCode of
+        HALT -> ( comp{ halted = True }, "HALT\n" )
+        LINE -> ( comp{ pc = pc comp + 1 } , "\n" )
+        PRINT -> let TextOperand s = operand
+                 in ( comp{ pc = pc comp + 1 }, s )
+        STORE -> let SymbolOperand s = operand
+                     comp'=  comp{ pc = pc comp + 1
+                                 , ram = Map.insert s (acc comp) (ram comp) }
+                 in ( comp', "" )
+        _ -> let comp' = comp{ pc = pc comp + 1 }
+                 output = "step: PC = " ++  (show $ pc comp') ++ "\n"
+             in ( comp', output )
