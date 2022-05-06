@@ -46,6 +46,7 @@ execute comp = do
     then return ()
     else execute comp'
 
+-- TODO add line number to error references
 
 -- Execute a single step/cycle
 step :: Computer -> (Computer, String)
@@ -55,14 +56,29 @@ step comp
     , "PC OUT OF RANGE: " ++ (show $ pc comp) ++ "\n"
     )
 
+  -- TODO can any common parts be factored out?
   | otherwise =
       let pcv = fromIntegral $ pc comp
           Instruction lineNo opCode operand = program comp !! pcv
       in case opCode of
-        HALT -> ( comp{ halted = True }, "HALT\n" )
+        HALT -> ( comp{ halted = True }, "\nHALT\n" )
+
         LINE -> ( comp{ pc = pc comp + 1 } , "\n" )
+
         PRINT -> let TextOperand s = operand
                  in ( comp{ pc = pc comp + 1 }, s )
+
+        LOAD -> let ValueOperand v = operand
+                    val = case v of
+                            Left n -> Right n
+                            Right s -> case Map.lookup s $ ram comp of
+                              Just n -> Right n
+                              Nothing -> Left $ "\nERROR: Unknown variable: '"
+                                ++ s ++ "' at line " ++ show lineNo ++ "\n"
+                 in case val of
+                      Left err -> ( comp { halted = True }, err )
+                      Right n -> ( comp { pc = pc comp + 1, acc = n }, "")
+
         STORE -> let SymbolOperand s = operand
                      comp'=  comp{ pc = pc comp + 1
                                  , ram = Map.insert s (acc comp) (ram comp) }
