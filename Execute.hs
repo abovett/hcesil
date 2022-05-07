@@ -9,6 +9,7 @@ import Control.Monad.Except
 import Control.Monad.IO.Class
 import Control.Monad.Trans.State
 import qualified Data.Map as Map
+import Text.Printf
 
 import Common ( LineNo
               , Address
@@ -71,13 +72,20 @@ step :: Computer -> Either String (Computer, String)
 step comp = do
   let Instruction lineNo opCode operand = program comp !! (fromIntegral . pc $ comp)
   case opCode of
-    HALT -> Right ( comp{ halted = True }, "\nHALT\n" )
+    IN -> if null $ dataVals comp
+          then Left $ "Data exhausted at line " ++ show lineNo ++ "\n"
+          else let a:dv = dataVals comp
+               in Right ( comp { acc = a, dataVals = dv, pc = pc comp + 1 } , "" )
+
+    OUT -> Right ( comp{ pc = pc comp + 1 } , printf "%8d" $ acc comp )
 
     LINE -> Right ( comp{ pc = pc comp + 1 } , "\n" )
 
     PRINT ->
       let TextOperand s = operand
       in Right ( comp{ pc = pc comp + 1 }, s )
+
+    HALT -> Right ( comp{ halted = True }, "" )
 
     LOAD -> do
       n <- getVal operand comp lineNo
@@ -88,11 +96,47 @@ step comp = do
           ram' = Map.insert s (acc comp) (ram comp)
       in Right ( comp{ pc = pc comp + 1, ram = ram' }, "" )
 
-    -- TODO eliminate this once all instructions implemented.
-    _ ->
-      let comp' = comp{ pc = pc comp + 1 }
-          output = "step: PC = " ++  (show $ pc comp') ++ "\n"
-      in Right ( comp', output )
+    ADD -> do
+      n <- getVal operand comp lineNo
+      let a = acc comp + n
+      Right ( comp { pc = pc comp + 1, acc = a }, "")
+
+    SUBTRACT -> do
+      n <- getVal operand comp lineNo
+      let a = acc comp - n
+      Right ( comp { pc = pc comp + 1, acc = a }, "")
+
+    MULTIPLY -> do
+      n <- getVal operand comp lineNo
+      let a = acc comp * n
+      Right ( comp { pc = pc comp + 1, acc = a }, "")
+
+    DIVIDE -> do
+      n <- getVal operand comp lineNo
+      if n == 0
+        then Left $ "Divide by zero error at line " ++ show lineNo ++ "\n"
+        else let a = acc comp `div` n
+             in Right ( comp { pc = pc comp + 1, acc = a }, "")
+
+    JUMP -> do
+      let AddrOperand a = operand
+      Right ( comp { pc = a }, "")
+
+    JIZERO -> do
+      let AddrOperand a = operand
+          pc' = if acc comp == 0
+                then a
+                else pc comp + 1
+      Right ( comp { pc = pc' }, "")
+
+    JINEG -> do
+      let AddrOperand a = operand
+          pc' = if acc comp < 0
+                then a
+                else pc comp + 1
+      Right ( comp { pc = pc' }, "")
+
+    NoOp -> Right ( comp { pc = pc comp + 1 }, "")
 
 
 -- Get the value of a numeric operand, which may be a literal constant
