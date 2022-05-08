@@ -10,6 +10,7 @@ import Text.Read
 import Data.List
 import Data.Either
 import qualified Data.Map as Map
+import Data.Array
 
 import Common
 import ScanSource
@@ -38,15 +39,16 @@ instructionDefs = Map.fromList
 
 
 -- "Compile" the program
-compile :: String -> Either String ([Instruction], [Integer])
+compile :: String -> Either String (Array Integer Instruction, [Integer])
 compile source =
   let (codeLines, dataLines) = scanSource source
       jumpTable = makeJumpTable codeLines
       (pErrors, code) = partitionEithers $ compileCode codeLines jumpTable
       (dErrors, dataVals) = partitionEithers $ getDataValues dataLines
       errors = pErrors ++ dErrors
+      program = listArray (0, fromIntegral (length code - 1)) code
   in if null errors
-     then Right (code, dataVals)
+     then Right (program, dataVals)
      else let s = concat $ intersperse "\n" errors
           in Left $ "Compilation failed.\n" ++ s
 

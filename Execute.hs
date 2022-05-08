@@ -9,6 +9,7 @@ import Control.Monad.Except
 import Control.Monad.IO.Class
 import Control.Monad.Trans.State
 import qualified Data.Map as Map
+import Data.Array
 import Text.Printf
 
 import Common ( LineNo
@@ -19,7 +20,7 @@ import Common ( LineNo
               )
 
 -- Define the computer state
-data Computer = Computer { program :: [Instruction]
+data Computer = Computer { program :: Array Integer Instruction
                          , dataVals :: [Integer]
                          , ram :: Map.Map String Integer
                          , acc :: Integer
@@ -29,6 +30,7 @@ data Computer = Computer { program :: [Instruction]
 
 
 -- Initialise the computer and run the program
+runProgram :: Array Integer Instruction -> [Integer] -> IO ()
 runProgram pr dv = do
   let comp = Computer { program = pr
                       , dataVals = dv
@@ -70,7 +72,7 @@ checkPC comp =
 -- Execute a single step/cycle
 step :: Computer -> Either String (Computer, String)
 step comp = do
-  let Instruction lineNo opCode operand = program comp !! (fromIntegral . pc $ comp)
+  let Instruction lineNo opCode operand = program comp ! (fromIntegral . pc $ comp)
   case opCode of
     IN -> if null $ dataVals comp
           then Left $ "Data exhausted at line " ++ show lineNo ++ "\n"
