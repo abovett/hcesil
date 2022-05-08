@@ -5,7 +5,6 @@ import Control.Exception
 import Control.Monad.Except
 import Data.List
 
-import Common ( Instruction (..) )
 import Compile
 import Execute
 

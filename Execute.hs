@@ -6,8 +6,6 @@ module Execute
 
 
 import Control.Monad.Except
-import Control.Monad.IO.Class
-import Control.Monad.Trans.State
 import qualified Data.Map as Map
 import Data.Array
 import Text.Printf
