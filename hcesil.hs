@@ -29,11 +29,11 @@ main =
               Just fname -> return fname
           source <- readSource fname
           (program, dataVals) <- liftEither $ compile source
-          liftIO $ runProgram program dataVals
+          runProgram program dataVals
 
 -- Report an error if present.
 handleErrors :: Either String () -> IO ()
-handleErrors (Left err) = putStrLn $ "*** ERROR: " ++ err
+handleErrors (Left err) = putStrLn $ "\n*** ERROR: " ++ err
 handleErrors (Right _) = return ()
 
 -- Open and read in the source file.

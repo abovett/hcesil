@@ -22,7 +22,7 @@ data Computer =
     }
 
 -- Initialise the computer and run the program
-runProgram :: Array Integer Instruction -> [Integer] -> IO ()
+runProgram :: Array Integer Instruction -> [Integer] -> ExceptT String IO ()
 runProgram pr dv =
   let comp =
         Computer
@@ -36,20 +36,14 @@ runProgram pr dv =
    in execute comp
 
 -- Main execution "loop"
-execute :: Computer -> IO ()
-execute comp =
-  handleErrors <=< runExceptT $ do
-    liftEither $ checkPC comp
-    (comp', output) <- liftEither . step $ comp
-    liftIO $ putStr output
-    if halted comp'
-      then return ()
-      else liftIO . execute $ comp'
-
--- Format and report an error.
-handleErrors :: Either String () -> IO ()
-handleErrors (Left err) = putStrLn $ "*** ERROR: " ++ err
-handleErrors (Right _) = return ()
+execute :: Computer -> ExceptT String IO ()
+execute comp = do
+  liftEither $ checkPC comp
+  (comp', output) <- liftEither . step $ comp
+  liftIO $ putStr output
+  if halted comp'
+    then return ()
+    else execute $ comp'
 
 -- Check program counter is in range. It shouldn't be possible for it
 -- to go out of range unless compilation has gone wrong somehow, but
