@@ -8,7 +8,14 @@ import Data.Array
 import qualified Data.Map as Map
 import Text.Printf
 
-import Common (Address, Instruction(..), LineNo, OpCode(..), Operand(..))
+import Common
+  ( Address
+  , Instruction(..)
+  , LineNo
+  , OpCode(..)
+  , Operand(..)
+  , Params(..)
+  )
 
 -- Define the computer state
 data Computer =
@@ -18,12 +25,14 @@ data Computer =
     , ram :: Map.Map String Integer
     , acc :: Integer
     , pc :: Integer
+    , steps :: Integer
     , halted :: Bool
     }
 
 -- Initialise the computer and run the program
-runProgram :: Array Integer Instruction -> [Integer] -> ExceptT String IO ()
-runProgram pr dv =
+runProgram ::
+     Array Integer Instruction -> [Integer] -> Params -> ExceptT String IO ()
+runProgram pr dv pars = do
   let comp =
         Computer
           { program = pr
@@ -31,19 +40,29 @@ runProgram pr dv =
           , ram = Map.empty
           , acc = 0
           , pc = 0
+          , steps = 0
           , halted = False
           }
-   in execute comp
+  comp' <- execute comp pars
+  if countSteps pars
+    then liftIO . putStrLn $ "Steps executed: " ++ (show $ steps comp')
+    else return ()
 
 -- Main execution "loop"
-execute :: Computer -> ExceptT String IO ()
-execute comp = do
+execute :: Computer -> Params -> ExceptT String IO Computer
+execute comp pars = do
   liftEither $ checkPC comp
-  (comp', output) <- liftEither . step $ comp
+  (comp', output) <- liftEither $ step comp
   liftIO $ putStr output
-  if halted comp'
-    then return ()
-    else execute $ comp'
+  case () of
+    _
+      | halted comp' -> return comp'
+      | Just (steps comp') == maxSteps pars -> do
+        liftIO $
+          putStrLn $
+          "Execution halted after " ++ (show $ steps comp') ++ " steps."
+        return comp'
+      | otherwise -> execute comp' pars
 
 -- Check program counter is in range. It shouldn't be possible for it
 -- to go out of range unless compilation has gone wrong somehow, but
@@ -59,61 +78,62 @@ step :: Computer -> Either String (Computer, String)
 step comp = do
   let Instruction lineNo opCode operand =
         program comp ! (fromIntegral . pc $ comp)
+      comp' = comp {pc = pc comp + 1, steps = steps comp + 1}
   case opCode of
     IN ->
       if null $ dataVals comp
         then Left $ "Data exhausted at line " ++ show lineNo ++ "\n"
         else let a:dv = dataVals comp
               in Right (comp {acc = a, dataVals = dv, pc = pc comp + 1}, "")
-    OUT -> Right (comp {pc = pc comp + 1}, printf "%8d" $ acc comp)
-    LINE -> Right (comp {pc = pc comp + 1}, "\n")
+    OUT -> Right (comp', printf "%8d" $ acc comp)
+    LINE -> Right (comp', "\n")
     PRINT ->
       let TextOperand s = operand
-       in Right (comp {pc = pc comp + 1}, s)
-    HALT -> Right (comp {halted = True}, "")
+       in Right (comp', s)
+    HALT -> Right (comp' {halted = True}, "")
     LOAD -> do
-      n <- getVal operand comp lineNo
-      Right (comp {pc = pc comp + 1, acc = n}, "")
+      n <- getVal operand comp' lineNo
+      Right (comp' {acc = n}, "")
     STORE ->
       let SymbolOperand s = operand
-          ram' = Map.insert s (acc comp) (ram comp)
-       in Right (comp {pc = pc comp + 1, ram = ram'}, "")
+          ram' = Map.insert s (acc comp') (ram comp')
+       in Right (comp' {ram = ram'}, "")
     ADD -> do
-      n <- getVal operand comp lineNo
-      let a = acc comp + n
-      Right (comp {pc = pc comp + 1, acc = a}, "")
+      n <- getVal operand comp' lineNo
+      let a = acc comp' + n
+      Right (comp' {acc = a}, "")
     SUBTRACT -> do
-      n <- getVal operand comp lineNo
-      let a = acc comp - n
-      Right (comp {pc = pc comp + 1, acc = a}, "")
+      n <- getVal operand comp' lineNo
+      let a = acc comp' - n
+      Right (comp' {acc = a}, "")
     MULTIPLY -> do
-      n <- getVal operand comp lineNo
-      let a = acc comp * n
-      Right (comp {pc = pc comp + 1, acc = a}, "")
+      n <- getVal operand comp' lineNo
+      let a = acc comp' * n
+      Right (comp' {acc = a}, "")
     DIVIDE -> do
-      n <- getVal operand comp lineNo
+      n <- getVal operand comp' lineNo
       if n == 0
         then Left $ "Divide by zero error at line " ++ show lineNo ++ "\n"
-        else let a = acc comp `div` n
-              in Right (comp {pc = pc comp + 1, acc = a}, "")
+        else let a = acc comp' `div` n
+              in Right (comp' {acc = a}, "")
     JUMP -> do
       let AddrOperand a = operand
-      Right (comp {pc = a}, "")
+      Right (comp' {pc = a}, "")
     JIZERO -> do
       let AddrOperand a = operand
-          pc' =
-            if acc comp == 0
-              then a
-              else pc comp + 1
-      Right (comp {pc = pc'}, "")
+          comp'' =
+            if acc comp' == 0
+              then comp' {pc = a}
+              else comp'
+      Right (comp'', "")
     JINEG -> do
       let AddrOperand a = operand
-          pc' =
-            if acc comp < 0
-              then a
-              else pc comp + 1
-      Right (comp {pc = pc'}, "")
-    NoOp -> Right (comp {pc = pc comp + 1}, "")
+          comp'' =
+            if acc comp' < 0
+              then comp' {pc = a}
+              else comp'
+      Right (comp'', "")
+    NoOp -> Right (comp' {steps = steps comp}, "")
 
 -- Get the value of a numeric operand, which may be a literal constant
 -- or a reference to a stored variable.

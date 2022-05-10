@@ -1,5 +1,4 @@
 -- CESIL interpreter top level
--- TODO implement maxsteps
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.Trans.Maybe
@@ -29,7 +28,7 @@ main =
               Just fname -> return fname
           source <- readSource fname
           (program, dataVals) <- liftEither $ compile source
-          runProgram program dataVals
+          runProgram program dataVals pars
 
 -- Report an error if present.
 handleErrors :: Either String () -> IO ()

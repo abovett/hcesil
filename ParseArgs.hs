@@ -7,15 +7,7 @@ module ParseArgs
 
 import Text.Read
 
--- A type to hold all parameters after parsing
-data Params =
-  Params
-    { filename :: Maybe String
-    , help :: Bool
-    , version :: Bool
-    , maxSteps :: Maybe Integer
-    }
-  deriving (Show)
+import Common (Params(..))
 
 -- Parse the command line
 parseArgs :: [String] -> Either String Params
@@ -25,6 +17,7 @@ parseArgs args =
           { filename = Nothing
           , help = False
           , version = False
+          , countSteps = False
           , maxSteps = Nothing
           }
    in argParser args pars
@@ -39,6 +32,8 @@ argParser (a:ra) pars = do
       _
         | a `elem` ["-h", "--help"] -> Right (ra, pars {help = True})
         | a `elem` ["-v", "--version"] -> Right (ra, pars {version = True})
+        | a `elem` ["-c", "--countsteps"] ->
+          Right (ra, pars {countSteps = True})
         | a `elem` ["-m", "--maxsteps"] ->
           (\n -> (tail ra, pars {maxSteps = Just n})) <$> (getPosInt a ra)
         | (head a) == '-' -> Left $ "Unrecognised option: " ++ a
