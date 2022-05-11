@@ -1,0 +1,7 @@
+*       A simple program
+        LOAD    1
+label
+        ADD     2
+        OUT
+        LINE
+        HALT

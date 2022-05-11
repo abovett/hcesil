@@ -1,0 +1,6 @@
+        PRINT   "Starting"
+        LOAD    1
+        ADD     1
+        OUT
+        LINE
+        PRINT   "End"

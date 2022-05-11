@@ -1,0 +1,1647 @@
+* Maze program
+*
+* Data values are:
+* 1. Width
+* 2. Height
+* 3. Random seed
+*
+* Values are
+* 8: Joined to cell above
+* 4: Joined to cell at left
+* 2: Joined to cell below
+* 1: Joined to cell at right
+* add these together for a combination of them.
+
+*** Initialise
+        IN
+        STORE           WIDTH
+        IN
+        STORE           HEIGHT
+        MULTIPLY        WIDTH
+        STORE           TOTAL_SIZE
+        SUBTRACT        101
+        JINEG           SIZE_OK
+        PRINT           "Size is too big"
+        LINE
+        HALT
+SIZE_OK
+* Initialise psuedorandom number generator
+        IN
+        STORE           RAND_INTERNAL_VAL
+* Fill "array" with zeros
+        LOAD            0
+        STORE           A0
+        STORE           A1
+        STORE           A2
+        STORE           A3
+        STORE           A4
+        STORE           A5
+        STORE           A6
+        STORE           A7
+        STORE           A8
+        STORE           A9
+        STORE           A10
+        STORE           A11
+        STORE           A12
+        STORE           A13
+        STORE           A14
+        STORE           A15
+        STORE           A16
+        STORE           A17
+        STORE           A18
+        STORE           A19
+        STORE           A20
+        STORE           A21
+        STORE           A22
+        STORE           A23
+        STORE           A24
+        STORE           A25
+        STORE           A26
+        STORE           A27
+        STORE           A28
+        STORE           A29
+        STORE           A30
+        STORE           A31
+        STORE           A32
+        STORE           A33
+        STORE           A34
+        STORE           A35
+        STORE           A36
+        STORE           A37
+        STORE           A38
+        STORE           A39
+        STORE           A40
+        STORE           A41
+        STORE           A42
+        STORE           A43
+        STORE           A44
+        STORE           A45
+        STORE           A46
+        STORE           A47
+        STORE           A48
+        STORE           A49
+        STORE           A50
+        STORE           A51
+        STORE           A52
+        STORE           A53
+        STORE           A54
+        STORE           A55
+        STORE           A56
+        STORE           A57
+        STORE           A58
+        STORE           A59
+        STORE           A60
+        STORE           A61
+        STORE           A62
+        STORE           A63
+        STORE           A64
+        STORE           A65
+        STORE           A66
+        STORE           A67
+        STORE           A68
+        STORE           A69
+        STORE           A70
+        STORE           A71
+        STORE           A72
+        STORE           A73
+        STORE           A74
+        STORE           A75
+        STORE           A76
+        STORE           A77
+        STORE           A78
+        STORE           A79
+        STORE           A80
+        STORE           A81
+        STORE           A82
+        STORE           A83
+        STORE           A84
+        STORE           A85
+        STORE           A86
+        STORE           A87
+        STORE           A88
+        STORE           A89
+        STORE           A90
+        STORE           A91
+        STORE           A92
+        STORE           A93
+        STORE           A94
+        STORE           A95
+        STORE           A96
+        STORE           A97
+        STORE           A98
+        STORE           A99
+
+*** Create maze
+
+* Set starting point
+        LOAD            1
+        STORE           A7
+        LOAD            4
+        STORE           A8
+
+* Loop until all cells occupied
+        LOAD            2
+        STORE           COMPLETED
+PASS_LOOP
+* Loop through all cells
+        LOAD            0
+        STORE           X
+        STORE           Y
+        STORE           CELL_NUM
+CELL_LOOP
+* Get current cell value
+        LOAD            CELL_NUM
+        STORE           INDEX
+        LOAD            3
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_3
+        LOAD            A_VAL
+        STORE           THIS_CELL_VAL
+* If cell already joined, skip
+        JIZERO          NOT_JOINED_YET
+        JUMP            NEXT_CELL
+NOT_JOINED_YET
+
+* Generate psuedo-random number
+        LOAD            RAND_INTERNAL_VAL
+        MULTIPLY        7
+        STORE           RAND_BIGNUM
+        DIVIDE          101
+        MULTIPLY        101
+        STORE           RAND_QUOTIENT
+        LOAD            RAND_BIGNUM
+        SUBTRACT        RAND_QUOTIENT
+        STORE           RAND_INTERNAL_VAL
+        DIVIDE          10
+        MULTIPLY        10
+        STORE           RAND_QUOTIENT2
+        LOAD            RAND_INTERNAL_VAL
+        SUBTRACT        RAND_QUOTIENT2
+
+* Randomly choose up, left, down, right, or none
+        JIZERO          JOIN_UP
+        SUBTRACT        1
+        JIZERO          JOIN_LEFT
+        SUBTRACT        1
+        JIZERO          JOIN_DOWN
+        SUBTRACT        1
+        JIZERO          JOIN_RIGHT
+        JUMP            NEXT_CELL
+
+* If Up...
+JOIN_UP
+* If on top row, skip to next cell
+        LOAD            Y
+        JIZERO          NEXT_CELL
+* Get cell above
+        LOAD            CELL_NUM
+        SUBTRACT        WIDTH
+        STORE           JOINING_TO
+        STORE           INDEX
+        LOAD            4
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_4
+
+* If cell above is not occupied, skip to next cell
+        LOAD            A_VAL
+        JIZERO          NEXT_CELL
+
+* Join cell above down to current cell
+        ADD             2
+
+* Store value back into cell above
+        STORE           A_VAL
+        LOAD            JOINING_TO
+        STORE           INDEX
+        LOAD            2
+        STORE           A_WRITE_RET
+        JUMP            ARRAY_WRITE
+A_WRITE_RET_2
+
+* Join current cell to cell above
+        LOAD            THIS_CELL_VAL
+        ADD             8
+        JUMP            COMPLETE_CELL_JOIN
+
+* If Left...
+JOIN_LEFT
+* If on left column, skip to next cell
+        LOAD            X
+        JIZERO          NEXT_CELL
+* Get cell to left
+        LOAD            CELL_NUM
+        SUBTRACT        1
+        STORE           JOINING_TO
+        STORE           INDEX
+        LOAD            5
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_5
+
+* If cell to left is not occupied, skip to next cell
+        LOAD            A_VAL
+        JIZERO          NEXT_CELL
+
+* Join cell at left right to current cell
+        ADD             1
+* Store back into cell to left
+        STORE           A_VAL
+        LOAD            JOINING_TO
+        STORE           INDEX
+        LOAD            3
+        STORE           A_WRITE_RET
+        JUMP            ARRAY_WRITE
+A_WRITE_RET_3
+
+* Join current cell to cell at left
+        LOAD            THIS_CELL_VAL
+        ADD             4
+        JUMP            COMPLETE_CELL_JOIN
+
+* If Down...
+JOIN_DOWN
+* If on botton row, skip to next cell
+        LOAD            Y
+        ADD             1
+        SUBTRACT        HEIGHT
+        JIZERO          NEXT_CELL
+* Get cell below
+        LOAD            CELL_NUM
+        ADD             WIDTH
+        STORE           JOINING_TO
+        STORE           INDEX
+        LOAD            6
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_6
+
+* If cell below is not occupied, skip to next cell
+        LOAD            A_VAL
+        JIZERO          NEXT_CELL
+
+* Join cell below up to current cell
+        ADD             8
+* Store value back into cell below
+        STORE           A_VAL
+        LOAD            JOINING_TO
+        STORE           INDEX
+        LOAD            4
+        STORE           A_WRITE_RET
+        JUMP            ARRAY_WRITE
+A_WRITE_RET_4
+
+* Join current cell to cell below
+        LOAD            THIS_CELL_VAL
+        ADD             2
+        JUMP            COMPLETE_CELL_JOIN
+
+* If right...
+JOIN_RIGHT
+*   If on right column, skip to next cell
+        LOAD            X
+        ADD             1
+        SUBTRACT        WIDTH
+        JIZERO          NEXT_CELL
+*   Get cell to right
+        LOAD            CELL_NUM
+        ADD             1
+        STORE           JOINING_TO
+        STORE           INDEX
+        LOAD            7
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_7
+
+*   If cell to right is not occupied, skip to next cell
+        LOAD            A_VAL
+        JIZERO          NEXT_CELL
+
+* Join cell at right left to current cell
+        ADD             4
+* Store value back into cell at right
+        STORE           A_VAL
+        LOAD            JOINING_TO
+        STORE           INDEX
+        LOAD            5
+        STORE           A_WRITE_RET
+        JUMP            ARRAY_WRITE
+A_WRITE_RET_5
+
+* Join current cell to cell right
+        LOAD            THIS_CELL_VAL
+        ADD             1
+
+* Common code at end of cell joins
+COMPLETE_CELL_JOIN
+* Store value back into current cell
+        STORE           A_VAL
+        LOAD            CELL_NUM
+        STORE           INDEX
+        LOAD            1
+        STORE           A_WRITE_RET
+        JUMP            ARRAY_WRITE
+A_WRITE_RET_1
+
+* Increment joined cell count
+        LOAD            COMPLETED
+        ADD             1
+        STORE           COMPLETED
+
+* Go to next cell
+        JUMP            NEXT_CELL
+
+
+*   Go to next cell
+
+* Next cell
+NEXT_CELL
+        LOAD            X
+        ADD             1
+        STORE           X
+        SUBTRACT        WIDTH
+        JINEG           NOTWRAP
+        LOAD            0
+        STORE           X
+        LOAD            Y
+        ADD             1
+        STORE           Y
+NOTWRAP
+        LOAD            CELL_NUM
+        ADD             1
+        STORE           CELL_NUM
+
+* If not at last cell, go to next cell
+        SUBTRACT        TOTAL_SIZE
+        JINEG           CELL_LOOP
+
+* If not complete, do another pass
+        LOAD            COMPLETED
+        SUBTRACT        TOTAL_SIZE
+        JINEG           PASS_LOOP
+
+*** Print maze
+PRINT_MAZE
+        LOAD            0
+        STORE           CELL_NUM
+        STORE           Y
+PRINTLOOP_Y
+* Print top of cells
+        LOAD            0
+        STORE           X
+PRINTLOOP_X
+        LOAD            CELL_NUM
+        STORE           INDEX
+        LOAD            1
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_1
+        LOAD            A_VAL
+        SUBTRACT        8
+        JINEG           HBAR
+        PRINT           "+  "
+        JUMP            TOP_DONE
+HBAR    PRINT           "+--"
+TOP_DONE
+        LOAD            CELL_NUM
+        ADD             1
+        STORE           CELL_NUM
+        LOAD            X
+        ADD             1
+        STORE           X
+        SUBTRACT        WIDTH
+        JINEG           PRINTLOOP_X
+        PRINT           "+"
+* Print sides of cells
+        LINE
+        LOAD            0
+        STORE           X
+        LOAD            CELL_NUM
+        SUBTRACT        WIDTH
+        STORE           CELL_NUM
+PRINTLOOP_X2
+        LOAD            CELL_NUM
+        STORE           INDEX
+        LOAD            2
+        STORE           A_READ_RET
+        JUMP            ARRAY_READ
+A_READ_RET_2
+        LOAD            A_VAL
+        DIVIDE          4
+        SUBTRACT        1
+        JIZERO          VGAP
+        SUBTRACT        2
+        JIZERO          VGAP
+* Insert entrance if X=0 and Y=0
+        LOAD            X
+        JIZERO          MAYBE
+        JUMP            VBAR
+MAYBE
+        LOAD            Y
+        JIZERO          VGAP
+VBAR    PRINT           "|  "
+        JUMP            SIDE_DONE
+VGAP    PRINT           "   "
+SIDE_DONE
+        LOAD            CELL_NUM
+        ADD             1
+        STORE           CELL_NUM
+        LOAD            X
+        ADD             1
+        STORE           X
+        SUBTRACT        WIDTH
+        JINEG           PRINTLOOP_X2
+* Print right bar and move on to next row
+        LOAD            Y
+        ADD             1
+        STORE           Y
+        SUBTRACT        HEIGHT
+        JINEG           RIGHT_SIDE
+        JUMP            BASE
+RIGHT_SIDE
+        PRINT           "|"
+        LINE
+        JUMP    PRINTLOOP_Y
+* Print bottom
+BASE
+        LINE
+        LOAD            0
+        STORE           X
+BOTTOM_LOOP
+        PRINT           "+--"
+        LOAD            X
+        ADD             1
+        STORE           X
+        SUBTRACT        WIDTH
+        JINEG           BOTTOM_LOOP
+        PRINT           "+"
+DONE
+        LINE
+        HALT
+
+*** Subroutines
+
+* Array write
+ARRAY_WRITE
+        LOAD            INDEX
+        JIZERO          WRITE_A0
+        SUBTRACT        1
+        JIZERO          WRITE_A1
+        SUBTRACT        1
+        JIZERO          WRITE_A2
+        SUBTRACT        1
+        JIZERO          WRITE_A3
+        SUBTRACT        1
+        JIZERO          WRITE_A4
+        SUBTRACT        1
+        JIZERO          WRITE_A5
+        SUBTRACT        1
+        JIZERO          WRITE_A6
+        SUBTRACT        1
+        JIZERO          WRITE_A7
+        SUBTRACT        1
+        JIZERO          WRITE_A8
+        SUBTRACT        1
+        JIZERO          WRITE_A9
+        SUBTRACT        1
+        JIZERO          WRITE_A10
+        SUBTRACT        1
+        JIZERO          WRITE_A11
+        SUBTRACT        1
+        JIZERO          WRITE_A12
+        SUBTRACT        1
+        JIZERO          WRITE_A13
+        SUBTRACT        1
+        JIZERO          WRITE_A14
+        SUBTRACT        1
+        JIZERO          WRITE_A15
+        SUBTRACT        1
+        JIZERO          WRITE_A16
+        SUBTRACT        1
+        JIZERO          WRITE_A17
+        SUBTRACT        1
+        JIZERO          WRITE_A18
+        SUBTRACT        1
+        JIZERO          WRITE_A19
+        SUBTRACT        1
+        JIZERO          WRITE_A20
+        SUBTRACT        1
+        JIZERO          WRITE_A21
+        SUBTRACT        1
+        JIZERO          WRITE_A22
+        SUBTRACT        1
+        JIZERO          WRITE_A23
+        SUBTRACT        1
+        JIZERO          WRITE_A24
+        SUBTRACT        1
+        JIZERO          WRITE_A25
+        SUBTRACT        1
+        JIZERO          WRITE_A26
+        SUBTRACT        1
+        JIZERO          WRITE_A27
+        SUBTRACT        1
+        JIZERO          WRITE_A28
+        SUBTRACT        1
+        JIZERO          WRITE_A29
+        SUBTRACT        1
+        JIZERO          WRITE_A30
+        SUBTRACT        1
+        JIZERO          WRITE_A31
+        SUBTRACT        1
+        JIZERO          WRITE_A32
+        SUBTRACT        1
+        JIZERO          WRITE_A33
+        SUBTRACT        1
+        JIZERO          WRITE_A34
+        SUBTRACT        1
+        JIZERO          WRITE_A35
+        SUBTRACT        1
+        JIZERO          WRITE_A36
+        SUBTRACT        1
+        JIZERO          WRITE_A37
+        SUBTRACT        1
+        JIZERO          WRITE_A38
+        SUBTRACT        1
+        JIZERO          WRITE_A39
+        SUBTRACT        1
+        JIZERO          WRITE_A40
+        SUBTRACT        1
+        JIZERO          WRITE_A41
+        SUBTRACT        1
+        JIZERO          WRITE_A42
+        SUBTRACT        1
+        JIZERO          WRITE_A43
+        SUBTRACT        1
+        JIZERO          WRITE_A44
+        SUBTRACT        1
+        JIZERO          WRITE_A45
+        SUBTRACT        1
+        JIZERO          WRITE_A46
+        SUBTRACT        1
+        JIZERO          WRITE_A47
+        SUBTRACT        1
+        JIZERO          WRITE_A48
+        SUBTRACT        1
+        JIZERO          WRITE_A49
+        SUBTRACT        1
+        JIZERO          WRITE_A50
+        SUBTRACT        1
+        JIZERO          WRITE_A51
+        SUBTRACT        1
+        JIZERO          WRITE_A52
+        SUBTRACT        1
+        JIZERO          WRITE_A53
+        SUBTRACT        1
+        JIZERO          WRITE_A54
+        SUBTRACT        1
+        JIZERO          WRITE_A55
+        SUBTRACT        1
+        JIZERO          WRITE_A56
+        SUBTRACT        1
+        JIZERO          WRITE_A57
+        SUBTRACT        1
+        JIZERO          WRITE_A58
+        SUBTRACT        1
+        JIZERO          WRITE_A59
+        SUBTRACT        1
+        JIZERO          WRITE_A60
+        SUBTRACT        1
+        JIZERO          WRITE_A61
+        SUBTRACT        1
+        JIZERO          WRITE_A62
+        SUBTRACT        1
+        JIZERO          WRITE_A63
+        SUBTRACT        1
+        JIZERO          WRITE_A64
+        SUBTRACT        1
+        JIZERO          WRITE_A65
+        SUBTRACT        1
+        JIZERO          WRITE_A66
+        SUBTRACT        1
+        JIZERO          WRITE_A67
+        SUBTRACT        1
+        JIZERO          WRITE_A68
+        SUBTRACT        1
+        JIZERO          WRITE_A69
+        SUBTRACT        1
+        JIZERO          WRITE_A70
+        SUBTRACT        1
+        JIZERO          WRITE_A71
+        SUBTRACT        1
+        JIZERO          WRITE_A72
+        SUBTRACT        1
+        JIZERO          WRITE_A73
+        SUBTRACT        1
+        JIZERO          WRITE_A74
+        SUBTRACT        1
+        JIZERO          WRITE_A75
+        SUBTRACT        1
+        JIZERO          WRITE_A76
+        SUBTRACT        1
+        JIZERO          WRITE_A77
+        SUBTRACT        1
+        JIZERO          WRITE_A78
+        SUBTRACT        1
+        JIZERO          WRITE_A79
+        SUBTRACT        1
+        JIZERO          WRITE_A80
+        SUBTRACT        1
+        JIZERO          WRITE_A81
+        SUBTRACT        1
+        JIZERO          WRITE_A82
+        SUBTRACT        1
+        JIZERO          WRITE_A83
+        SUBTRACT        1
+        JIZERO          WRITE_A84
+        SUBTRACT        1
+        JIZERO          WRITE_A85
+        SUBTRACT        1
+        JIZERO          WRITE_A86
+        SUBTRACT        1
+        JIZERO          WRITE_A87
+        SUBTRACT        1
+        JIZERO          WRITE_A88
+        SUBTRACT        1
+        JIZERO          WRITE_A89
+        SUBTRACT        1
+        JIZERO          WRITE_A90
+        SUBTRACT        1
+        JIZERO          WRITE_A91
+        SUBTRACT        1
+        JIZERO          WRITE_A92
+        SUBTRACT        1
+        JIZERO          WRITE_A93
+        SUBTRACT        1
+        JIZERO          WRITE_A94
+        SUBTRACT        1
+        JIZERO          WRITE_A95
+        SUBTRACT        1
+        JIZERO          WRITE_A96
+        SUBTRACT        1
+        JIZERO          WRITE_A97
+        SUBTRACT        1
+        JIZERO          WRITE_A98
+        SUBTRACT        1
+        JIZERO          WRITE_A99
+
+        PRINT           "ERROR: Array write out of range"
+        LINE
+        HALT
+
+WRITE_A0
+        LOAD            A_VAL
+        STORE           A0
+        JUMP            A_WRITE_DO_RET
+WRITE_A1
+        LOAD            A_VAL
+        STORE           A1
+        JUMP            A_WRITE_DO_RET
+WRITE_A2
+        LOAD            A_VAL
+        STORE           A2
+        JUMP            A_WRITE_DO_RET
+WRITE_A3
+        LOAD            A_VAL
+        STORE           A3
+        JUMP            A_WRITE_DO_RET
+WRITE_A4
+        LOAD            A_VAL
+        STORE           A4
+        JUMP            A_WRITE_DO_RET
+WRITE_A5
+        LOAD            A_VAL
+        STORE           A5
+        JUMP            A_WRITE_DO_RET
+WRITE_A6
+        LOAD            A_VAL
+        STORE           A6
+        JUMP            A_WRITE_DO_RET
+WRITE_A7
+        LOAD            A_VAL
+        STORE           A7
+        JUMP            A_WRITE_DO_RET
+WRITE_A8
+        LOAD            A_VAL
+        STORE           A8
+        JUMP            A_WRITE_DO_RET
+WRITE_A9
+        LOAD            A_VAL
+        STORE           A9
+        JUMP            A_WRITE_DO_RET
+WRITE_A10
+        LOAD            A_VAL
+        STORE           A10
+        JUMP            A_WRITE_DO_RET
+WRITE_A11
+        LOAD            A_VAL
+        STORE           A11
+        JUMP            A_WRITE_DO_RET
+WRITE_A12
+        LOAD            A_VAL
+        STORE           A12
+        JUMP            A_WRITE_DO_RET
+WRITE_A13
+        LOAD            A_VAL
+        STORE           A13
+        JUMP            A_WRITE_DO_RET
+WRITE_A14
+        LOAD            A_VAL
+        STORE           A14
+        JUMP            A_WRITE_DO_RET
+WRITE_A15
+        LOAD            A_VAL
+        STORE           A15
+        JUMP            A_WRITE_DO_RET
+WRITE_A16
+        LOAD            A_VAL
+        STORE           A16
+        JUMP            A_WRITE_DO_RET
+WRITE_A17
+        LOAD            A_VAL
+        STORE           A17
+        JUMP            A_WRITE_DO_RET
+WRITE_A18
+        LOAD            A_VAL
+        STORE           A18
+        JUMP            A_WRITE_DO_RET
+WRITE_A19
+        LOAD            A_VAL
+        STORE           A19
+        JUMP            A_WRITE_DO_RET
+WRITE_A20
+        LOAD            A_VAL
+        STORE           A20
+        JUMP            A_WRITE_DO_RET
+WRITE_A21
+        LOAD            A_VAL
+        STORE           A21
+        JUMP            A_WRITE_DO_RET
+WRITE_A22
+        LOAD            A_VAL
+        STORE           A22
+        JUMP            A_WRITE_DO_RET
+WRITE_A23
+        LOAD            A_VAL
+        STORE           A23
+        JUMP            A_WRITE_DO_RET
+WRITE_A24
+        LOAD            A_VAL
+        STORE           A24
+        JUMP            A_WRITE_DO_RET
+WRITE_A25
+        LOAD            A_VAL
+        STORE           A25
+        JUMP            A_WRITE_DO_RET
+WRITE_A26
+        LOAD            A_VAL
+        STORE           A26
+        JUMP            A_WRITE_DO_RET
+WRITE_A27
+        LOAD            A_VAL
+        STORE           A27
+        JUMP            A_WRITE_DO_RET
+WRITE_A28
+        LOAD            A_VAL
+        STORE           A28
+        JUMP            A_WRITE_DO_RET
+WRITE_A29
+        LOAD            A_VAL
+        STORE           A29
+        JUMP            A_WRITE_DO_RET
+WRITE_A30
+        LOAD            A_VAL
+        STORE           A30
+        JUMP            A_WRITE_DO_RET
+WRITE_A31
+        LOAD            A_VAL
+        STORE           A31
+        JUMP            A_WRITE_DO_RET
+WRITE_A32
+        LOAD            A_VAL
+        STORE           A32
+        JUMP            A_WRITE_DO_RET
+WRITE_A33
+        LOAD            A_VAL
+        STORE           A33
+        JUMP            A_WRITE_DO_RET
+WRITE_A34
+        LOAD            A_VAL
+        STORE           A34
+        JUMP            A_WRITE_DO_RET
+WRITE_A35
+        LOAD            A_VAL
+        STORE           A35
+        JUMP            A_WRITE_DO_RET
+WRITE_A36
+        LOAD            A_VAL
+        STORE           A36
+        JUMP            A_WRITE_DO_RET
+WRITE_A37
+        LOAD            A_VAL
+        STORE           A37
+        JUMP            A_WRITE_DO_RET
+WRITE_A38
+        LOAD            A_VAL
+        STORE           A38
+        JUMP            A_WRITE_DO_RET
+WRITE_A39
+        LOAD            A_VAL
+        STORE           A39
+        JUMP            A_WRITE_DO_RET
+WRITE_A40
+        LOAD            A_VAL
+        STORE           A40
+        JUMP            A_WRITE_DO_RET
+WRITE_A41
+        LOAD            A_VAL
+        STORE           A41
+        JUMP            A_WRITE_DO_RET
+WRITE_A42
+        LOAD            A_VAL
+        STORE           A42
+        JUMP            A_WRITE_DO_RET
+WRITE_A43
+        LOAD            A_VAL
+        STORE           A43
+        JUMP            A_WRITE_DO_RET
+WRITE_A44
+        LOAD            A_VAL
+        STORE           A44
+        JUMP            A_WRITE_DO_RET
+WRITE_A45
+        LOAD            A_VAL
+        STORE           A45
+        JUMP            A_WRITE_DO_RET
+WRITE_A46
+        LOAD            A_VAL
+        STORE           A46
+        JUMP            A_WRITE_DO_RET
+WRITE_A47
+        LOAD            A_VAL
+        STORE           A47
+        JUMP            A_WRITE_DO_RET
+WRITE_A48
+        LOAD            A_VAL
+        STORE           A48
+        JUMP            A_WRITE_DO_RET
+WRITE_A49
+        LOAD            A_VAL
+        STORE           A49
+        JUMP            A_WRITE_DO_RET
+WRITE_A50
+        LOAD            A_VAL
+        STORE           A50
+        JUMP            A_WRITE_DO_RET
+WRITE_A51
+        LOAD            A_VAL
+        STORE           A51
+        JUMP            A_WRITE_DO_RET
+WRITE_A52
+        LOAD            A_VAL
+        STORE           A52
+        JUMP            A_WRITE_DO_RET
+WRITE_A53
+        LOAD            A_VAL
+        STORE           A53
+        JUMP            A_WRITE_DO_RET
+WRITE_A54
+        LOAD            A_VAL
+        STORE           A54
+        JUMP            A_WRITE_DO_RET
+WRITE_A55
+        LOAD            A_VAL
+        STORE           A55
+        JUMP            A_WRITE_DO_RET
+WRITE_A56
+        LOAD            A_VAL
+        STORE           A56
+        JUMP            A_WRITE_DO_RET
+WRITE_A57
+        LOAD            A_VAL
+        STORE           A57
+        JUMP            A_WRITE_DO_RET
+WRITE_A58
+        LOAD            A_VAL
+        STORE           A58
+        JUMP            A_WRITE_DO_RET
+WRITE_A59
+        LOAD            A_VAL
+        STORE           A59
+        JUMP            A_WRITE_DO_RET
+WRITE_A60
+        LOAD            A_VAL
+        STORE           A60
+        JUMP            A_WRITE_DO_RET
+WRITE_A61
+        LOAD            A_VAL
+        STORE           A61
+        JUMP            A_WRITE_DO_RET
+WRITE_A62
+        LOAD            A_VAL
+        STORE           A62
+        JUMP            A_WRITE_DO_RET
+WRITE_A63
+        LOAD            A_VAL
+        STORE           A63
+        JUMP            A_WRITE_DO_RET
+WRITE_A64
+        LOAD            A_VAL
+        STORE           A64
+        JUMP            A_WRITE_DO_RET
+WRITE_A65
+        LOAD            A_VAL
+        STORE           A65
+        JUMP            A_WRITE_DO_RET
+WRITE_A66
+        LOAD            A_VAL
+        STORE           A66
+        JUMP            A_WRITE_DO_RET
+WRITE_A67
+        LOAD            A_VAL
+        STORE           A67
+        JUMP            A_WRITE_DO_RET
+WRITE_A68
+        LOAD            A_VAL
+        STORE           A68
+        JUMP            A_WRITE_DO_RET
+WRITE_A69
+        LOAD            A_VAL
+        STORE           A69
+        JUMP            A_WRITE_DO_RET
+WRITE_A70
+        LOAD            A_VAL
+        STORE           A70
+        JUMP            A_WRITE_DO_RET
+WRITE_A71
+        LOAD            A_VAL
+        STORE           A71
+        JUMP            A_WRITE_DO_RET
+WRITE_A72
+        LOAD            A_VAL
+        STORE           A72
+        JUMP            A_WRITE_DO_RET
+WRITE_A73
+        LOAD            A_VAL
+        STORE           A73
+        JUMP            A_WRITE_DO_RET
+WRITE_A74
+        LOAD            A_VAL
+        STORE           A74
+        JUMP            A_WRITE_DO_RET
+WRITE_A75
+        LOAD            A_VAL
+        STORE           A75
+        JUMP            A_WRITE_DO_RET
+WRITE_A76
+        LOAD            A_VAL
+        STORE           A76
+        JUMP            A_WRITE_DO_RET
+WRITE_A77
+        LOAD            A_VAL
+        STORE           A77
+        JUMP            A_WRITE_DO_RET
+WRITE_A78
+        LOAD            A_VAL
+        STORE           A78
+        JUMP            A_WRITE_DO_RET
+WRITE_A79
+        LOAD            A_VAL
+        STORE           A79
+        JUMP            A_WRITE_DO_RET
+WRITE_A80
+        LOAD            A_VAL
+        STORE           A80
+        JUMP            A_WRITE_DO_RET
+WRITE_A81
+        LOAD            A_VAL
+        STORE           A81
+        JUMP            A_WRITE_DO_RET
+WRITE_A82
+        LOAD            A_VAL
+        STORE           A82
+        JUMP            A_WRITE_DO_RET
+WRITE_A83
+        LOAD            A_VAL
+        STORE           A83
+        JUMP            A_WRITE_DO_RET
+WRITE_A84
+        LOAD            A_VAL
+        STORE           A84
+        JUMP            A_WRITE_DO_RET
+WRITE_A85
+        LOAD            A_VAL
+        STORE           A85
+        JUMP            A_WRITE_DO_RET
+WRITE_A86
+        LOAD            A_VAL
+        STORE           A86
+        JUMP            A_WRITE_DO_RET
+WRITE_A87
+        LOAD            A_VAL
+        STORE           A87
+        JUMP            A_WRITE_DO_RET
+WRITE_A88
+        LOAD            A_VAL
+        STORE           A88
+        JUMP            A_WRITE_DO_RET
+WRITE_A89
+        LOAD            A_VAL
+        STORE           A89
+        JUMP            A_WRITE_DO_RET
+WRITE_A90
+        LOAD            A_VAL
+        STORE           A90
+        JUMP            A_WRITE_DO_RET
+WRITE_A91
+        LOAD            A_VAL
+        STORE           A91
+        JUMP            A_WRITE_DO_RET
+WRITE_A92
+        LOAD            A_VAL
+        STORE           A92
+        JUMP            A_WRITE_DO_RET
+WRITE_A93
+        LOAD            A_VAL
+        STORE           A93
+        JUMP            A_WRITE_DO_RET
+WRITE_A94
+        LOAD            A_VAL
+        STORE           A94
+        JUMP            A_WRITE_DO_RET
+WRITE_A95
+        LOAD            A_VAL
+        STORE           A95
+        JUMP            A_WRITE_DO_RET
+WRITE_A96
+        LOAD            A_VAL
+        STORE           A96
+        JUMP            A_WRITE_DO_RET
+WRITE_A97
+        LOAD            A_VAL
+        STORE           A97
+        JUMP            A_WRITE_DO_RET
+WRITE_A98
+        LOAD            A_VAL
+        STORE           A98
+        JUMP            A_WRITE_DO_RET
+WRITE_A99
+        LOAD            A_VAL
+        STORE           A99
+        JUMP            A_WRITE_DO_RET
+
+
+A_WRITE_DO_RET
+        LOAD            A_WRITE_RET
+        SUBTRACT        1
+        JIZERO          A_WRITE_RET_1
+        SUBTRACT        1
+        JIZERO          A_WRITE_RET_2
+        SUBTRACT        1
+        JIZERO          A_WRITE_RET_3
+        SUBTRACT        1
+        JIZERO          A_WRITE_RET_4
+        SUBTRACT        1
+        JIZERO          A_WRITE_RET_5
+        PRINT           "ERROR: UNRECOGNISED ARRAY WRITE RETURN DESTINATION"
+        LINE
+        HALT
+
+* ARRAY READ
+ARRAY_READ
+        LOAD            INDEX
+        JIZERO          READ_A0
+        SUBTRACT        1
+        JIZERO          READ_A1
+        SUBTRACT        1
+        JIZERO          READ_A2
+        SUBTRACT        1
+        JIZERO          READ_A3
+        SUBTRACT        1
+        JIZERO          READ_A4
+        SUBTRACT        1
+        JIZERO          READ_A5
+        SUBTRACT        1
+        JIZERO          READ_A6
+        SUBTRACT        1
+        JIZERO          READ_A7
+        SUBTRACT        1
+        JIZERO          READ_A8
+        SUBTRACT        1
+        JIZERO          READ_A9
+        SUBTRACT        1
+        JIZERO          READ_A10
+        SUBTRACT        1
+        JIZERO          READ_A11
+        SUBTRACT        1
+        JIZERO          READ_A12
+        SUBTRACT        1
+        JIZERO          READ_A13
+        SUBTRACT        1
+        JIZERO          READ_A14
+        SUBTRACT        1
+        JIZERO          READ_A15
+        SUBTRACT        1
+        JIZERO          READ_A16
+        SUBTRACT        1
+        JIZERO          READ_A17
+        SUBTRACT        1
+        JIZERO          READ_A18
+        SUBTRACT        1
+        JIZERO          READ_A19
+        SUBTRACT        1
+        JIZERO          READ_A20
+        SUBTRACT        1
+        JIZERO          READ_A21
+        SUBTRACT        1
+        JIZERO          READ_A22
+        SUBTRACT        1
+        JIZERO          READ_A23
+        SUBTRACT        1
+        JIZERO          READ_A24
+        SUBTRACT        1
+        JIZERO          READ_A25
+        SUBTRACT        1
+        JIZERO          READ_A26
+        SUBTRACT        1
+        JIZERO          READ_A27
+        SUBTRACT        1
+        JIZERO          READ_A28
+        SUBTRACT        1
+        JIZERO          READ_A29
+        SUBTRACT        1
+        JIZERO          READ_A30
+        SUBTRACT        1
+        JIZERO          READ_A31
+        SUBTRACT        1
+        JIZERO          READ_A32
+        SUBTRACT        1
+        JIZERO          READ_A33
+        SUBTRACT        1
+        JIZERO          READ_A34
+        SUBTRACT        1
+        JIZERO          READ_A35
+        SUBTRACT        1
+        JIZERO          READ_A36
+        SUBTRACT        1
+        JIZERO          READ_A37
+        SUBTRACT        1
+        JIZERO          READ_A38
+        SUBTRACT        1
+        JIZERO          READ_A39
+        SUBTRACT        1
+        JIZERO          READ_A40
+        SUBTRACT        1
+        JIZERO          READ_A41
+        SUBTRACT        1
+        JIZERO          READ_A42
+        SUBTRACT        1
+        JIZERO          READ_A43
+        SUBTRACT        1
+        JIZERO          READ_A44
+        SUBTRACT        1
+        JIZERO          READ_A45
+        SUBTRACT        1
+        JIZERO          READ_A46
+        SUBTRACT        1
+        JIZERO          READ_A47
+        SUBTRACT        1
+        JIZERO          READ_A48
+        SUBTRACT        1
+        JIZERO          READ_A49
+        SUBTRACT        1
+        JIZERO          READ_A50
+        SUBTRACT        1
+        JIZERO          READ_A51
+        SUBTRACT        1
+        JIZERO          READ_A52
+        SUBTRACT        1
+        JIZERO          READ_A53
+        SUBTRACT        1
+        JIZERO          READ_A54
+        SUBTRACT        1
+        JIZERO          READ_A55
+        SUBTRACT        1
+        JIZERO          READ_A56
+        SUBTRACT        1
+        JIZERO          READ_A57
+        SUBTRACT        1
+        JIZERO          READ_A58
+        SUBTRACT        1
+        JIZERO          READ_A59
+        SUBTRACT        1
+        JIZERO          READ_A60
+        SUBTRACT        1
+        JIZERO          READ_A61
+        SUBTRACT        1
+        JIZERO          READ_A62
+        SUBTRACT        1
+        JIZERO          READ_A63
+        SUBTRACT        1
+        JIZERO          READ_A64
+        SUBTRACT        1
+        JIZERO          READ_A65
+        SUBTRACT        1
+        JIZERO          READ_A66
+        SUBTRACT        1
+        JIZERO          READ_A67
+        SUBTRACT        1
+        JIZERO          READ_A68
+        SUBTRACT        1
+        JIZERO          READ_A69
+        SUBTRACT        1
+        JIZERO          READ_A70
+        SUBTRACT        1
+        JIZERO          READ_A71
+        SUBTRACT        1
+        JIZERO          READ_A72
+        SUBTRACT        1
+        JIZERO          READ_A73
+        SUBTRACT        1
+        JIZERO          READ_A74
+        SUBTRACT        1
+        JIZERO          READ_A75
+        SUBTRACT        1
+        JIZERO          READ_A76
+        SUBTRACT        1
+        JIZERO          READ_A77
+        SUBTRACT        1
+        JIZERO          READ_A78
+        SUBTRACT        1
+        JIZERO          READ_A79
+        SUBTRACT        1
+        JIZERO          READ_A80
+        SUBTRACT        1
+        JIZERO          READ_A81
+        SUBTRACT        1
+        JIZERO          READ_A82
+        SUBTRACT        1
+        JIZERO          READ_A83
+        SUBTRACT        1
+        JIZERO          READ_A84
+        SUBTRACT        1
+        JIZERO          READ_A85
+        SUBTRACT        1
+        JIZERO          READ_A86
+        SUBTRACT        1
+        JIZERO          READ_A87
+        SUBTRACT        1
+        JIZERO          READ_A88
+        SUBTRACT        1
+        JIZERO          READ_A89
+        SUBTRACT        1
+        JIZERO          READ_A90
+        SUBTRACT        1
+        JIZERO          READ_A91
+        SUBTRACT        1
+        JIZERO          READ_A92
+        SUBTRACT        1
+        JIZERO          READ_A93
+        SUBTRACT        1
+        JIZERO          READ_A94
+        SUBTRACT        1
+        JIZERO          READ_A95
+        SUBTRACT        1
+        JIZERO          READ_A96
+        SUBTRACT        1
+        JIZERO          READ_A97
+        SUBTRACT        1
+        JIZERO          READ_A98
+        SUBTRACT        1
+        JIZERO          READ_A99
+
+        PRINT           "ERROR: ARRAY READ OUT OF RANGE"
+        LINE
+        HALT
+
+READ_A0
+        LOAD            A0
+        JUMP            A_READ_DO_RET
+READ_A1
+        LOAD            A1
+        JUMP            A_READ_DO_RET
+READ_A2
+        LOAD            A2
+        JUMP            A_READ_DO_RET
+READ_A3
+        LOAD            A3
+        JUMP            A_READ_DO_RET
+READ_A4
+        LOAD            A4
+        JUMP            A_READ_DO_RET
+READ_A5
+        LOAD            A5
+        JUMP            A_READ_DO_RET
+READ_A6
+        LOAD            A6
+        JUMP            A_READ_DO_RET
+READ_A7
+        LOAD            A7
+        JUMP            A_READ_DO_RET
+READ_A8
+        LOAD            A8
+        JUMP            A_READ_DO_RET
+READ_A9
+        LOAD            A9
+        JUMP            A_READ_DO_RET
+READ_A10
+        LOAD            A10
+        JUMP            A_READ_DO_RET
+READ_A11
+        LOAD            A11
+        JUMP            A_READ_DO_RET
+READ_A12
+        LOAD            A12
+        JUMP            A_READ_DO_RET
+READ_A13
+        LOAD            A13
+        JUMP            A_READ_DO_RET
+READ_A14
+        LOAD            A14
+        JUMP            A_READ_DO_RET
+READ_A15
+        LOAD            A15
+        JUMP            A_READ_DO_RET
+READ_A16
+        LOAD            A16
+        JUMP            A_READ_DO_RET
+READ_A17
+        LOAD            A17
+        JUMP            A_READ_DO_RET
+READ_A18
+        LOAD            A18
+        JUMP            A_READ_DO_RET
+READ_A19
+        LOAD            A19
+        JUMP            A_READ_DO_RET
+READ_A20
+        LOAD            A20
+        JUMP            A_READ_DO_RET
+READ_A21
+        LOAD            A21
+        JUMP            A_READ_DO_RET
+READ_A22
+        LOAD            A22
+        JUMP            A_READ_DO_RET
+READ_A23
+        LOAD            A23
+        JUMP            A_READ_DO_RET
+READ_A24
+        LOAD            A24
+        JUMP            A_READ_DO_RET
+READ_A25
+        LOAD            A25
+        JUMP            A_READ_DO_RET
+READ_A26
+        LOAD            A26
+        JUMP            A_READ_DO_RET
+READ_A27
+        LOAD            A27
+        JUMP            A_READ_DO_RET
+READ_A28
+        LOAD            A28
+        JUMP            A_READ_DO_RET
+READ_A29
+        LOAD            A29
+        JUMP            A_READ_DO_RET
+READ_A30
+        LOAD            A30
+        JUMP            A_READ_DO_RET
+READ_A31
+        LOAD            A31
+        JUMP            A_READ_DO_RET
+READ_A32
+        LOAD            A32
+        JUMP            A_READ_DO_RET
+READ_A33
+        LOAD            A33
+        JUMP            A_READ_DO_RET
+READ_A34
+        LOAD            A34
+        JUMP            A_READ_DO_RET
+READ_A35
+        LOAD            A35
+        JUMP            A_READ_DO_RET
+READ_A36
+        LOAD            A36
+        JUMP            A_READ_DO_RET
+READ_A37
+        LOAD            A37
+        JUMP            A_READ_DO_RET
+READ_A38
+        LOAD            A38
+        JUMP            A_READ_DO_RET
+READ_A39
+        LOAD            A39
+        JUMP            A_READ_DO_RET
+READ_A40
+        LOAD            A40
+        JUMP            A_READ_DO_RET
+READ_A41
+        LOAD            A41
+        JUMP            A_READ_DO_RET
+READ_A42
+        LOAD            A42
+        JUMP            A_READ_DO_RET
+READ_A43
+        LOAD            A43
+        JUMP            A_READ_DO_RET
+READ_A44
+        LOAD            A44
+        JUMP            A_READ_DO_RET
+READ_A45
+        LOAD            A45
+        JUMP            A_READ_DO_RET
+READ_A46
+        LOAD            A46
+        JUMP            A_READ_DO_RET
+READ_A47
+        LOAD            A47
+        JUMP            A_READ_DO_RET
+READ_A48
+        LOAD            A48
+        JUMP            A_READ_DO_RET
+READ_A49
+        LOAD            A49
+        JUMP            A_READ_DO_RET
+READ_A50
+        LOAD            A50
+        JUMP            A_READ_DO_RET
+READ_A51
+        LOAD            A51
+        JUMP            A_READ_DO_RET
+READ_A52
+        LOAD            A52
+        JUMP            A_READ_DO_RET
+READ_A53
+        LOAD            A53
+        JUMP            A_READ_DO_RET
+READ_A54
+        LOAD            A54
+        JUMP            A_READ_DO_RET
+READ_A55
+        LOAD            A55
+        JUMP            A_READ_DO_RET
+READ_A56
+        LOAD            A56
+        JUMP            A_READ_DO_RET
+READ_A57
+        LOAD            A57
+        JUMP            A_READ_DO_RET
+READ_A58
+        LOAD            A58
+        JUMP            A_READ_DO_RET
+READ_A59
+        LOAD            A59
+        JUMP            A_READ_DO_RET
+READ_A60
+        LOAD            A60
+        JUMP            A_READ_DO_RET
+READ_A61
+        LOAD            A61
+        JUMP            A_READ_DO_RET
+READ_A62
+        LOAD            A62
+        JUMP            A_READ_DO_RET
+READ_A63
+        LOAD            A63
+        JUMP            A_READ_DO_RET
+READ_A64
+        LOAD            A64
+        JUMP            A_READ_DO_RET
+READ_A65
+        LOAD            A65
+        JUMP            A_READ_DO_RET
+READ_A66
+        LOAD            A66
+        JUMP            A_READ_DO_RET
+READ_A67
+        LOAD            A67
+        JUMP            A_READ_DO_RET
+READ_A68
+        LOAD            A68
+        JUMP            A_READ_DO_RET
+READ_A69
+        LOAD            A69
+        JUMP            A_READ_DO_RET
+READ_A70
+        LOAD            A70
+        JUMP            A_READ_DO_RET
+READ_A71
+        LOAD            A71
+        JUMP            A_READ_DO_RET
+READ_A72
+        LOAD            A72
+        JUMP            A_READ_DO_RET
+READ_A73
+        LOAD            A73
+        JUMP            A_READ_DO_RET
+READ_A74
+        LOAD            A74
+        JUMP            A_READ_DO_RET
+READ_A75
+        LOAD            A75
+        JUMP            A_READ_DO_RET
+READ_A76
+        LOAD            A76
+        JUMP            A_READ_DO_RET
+READ_A77
+        LOAD            A77
+        JUMP            A_READ_DO_RET
+READ_A78
+        LOAD            A78
+        JUMP            A_READ_DO_RET
+READ_A79
+        LOAD            A79
+        JUMP            A_READ_DO_RET
+READ_A80
+        LOAD            A80
+        JUMP            A_READ_DO_RET
+READ_A81
+        LOAD            A81
+        JUMP            A_READ_DO_RET
+READ_A82
+        LOAD            A82
+        JUMP            A_READ_DO_RET
+READ_A83
+        LOAD            A83
+        JUMP            A_READ_DO_RET
+READ_A84
+        LOAD            A84
+        JUMP            A_READ_DO_RET
+READ_A85
+        LOAD            A85
+        JUMP            A_READ_DO_RET
+READ_A86
+        LOAD            A86
+        JUMP            A_READ_DO_RET
+READ_A87
+        LOAD            A87
+        JUMP            A_READ_DO_RET
+READ_A88
+        LOAD            A88
+        JUMP            A_READ_DO_RET
+READ_A89
+        LOAD            A89
+        JUMP            A_READ_DO_RET
+READ_A90
+        LOAD            A90
+        JUMP            A_READ_DO_RET
+READ_A91
+        LOAD            A91
+        JUMP            A_READ_DO_RET
+READ_A92
+        LOAD            A92
+        JUMP            A_READ_DO_RET
+READ_A93
+        LOAD            A93
+        JUMP            A_READ_DO_RET
+READ_A94
+        LOAD            A94
+        JUMP            A_READ_DO_RET
+READ_A95
+        LOAD            A95
+        JUMP            A_READ_DO_RET
+READ_A96
+        LOAD            A96
+        JUMP            A_READ_DO_RET
+READ_A97
+        LOAD            A97
+        JUMP            A_READ_DO_RET
+READ_A98
+        LOAD            A98
+        JUMP            A_READ_DO_RET
+READ_A99
+        LOAD            A99
+        JUMP            A_READ_DO_RET
+
+
+A_READ_DO_RET
+        STORE           A_VAL
+        LOAD            A_READ_RET
+        SUBTRACT        1
+        JIZERO          A_READ_RET_1
+        SUBTRACT        1
+        JIZERO          A_READ_RET_2
+        SUBTRACT        1
+        JIZERO          A_READ_RET_3
+        SUBTRACT        1
+        JIZERO          A_READ_RET_4
+        SUBTRACT        1
+        JIZERO          A_READ_RET_5
+        SUBTRACT        1
+        JIZERO          A_READ_RET_6
+        SUBTRACT        1
+        JIZERO          A_READ_RET_7
+        PRINT           "ERROR: UNRECOGNISED ARRAY READ RETURN DESTINATION"
+        LINE
+        HALT
+
+* DATA VALUES ARE:
+* 1. WIDTH
+* 2. HEIGHT
+* 3. RANDOM SEED
+        %
+        10
+        10
+        24

@@ -52,5 +52,14 @@ argParser (a:ra) pars = do
         Nothing -> Left $ "Invalid parameter after option: " ++ a
 
 -- Define help text
--- TODO write help text
-helpText = "Help text not yet written"
+helpText =
+  "Usage: hcesil [FLAGS] FILE\n\
+  \Execute CESIL program FILE.\n\
+  \\n\
+  \OPTIONS are:\n\
+  \  -c, --countsteps  Count the steps executed and report at program\n\
+  \                      completion.\n\
+  \  -h, --help        Display this help text and exit.\n\
+  \  -m MAX, --maxsteps MAX\n\
+  \                    Halt the program after MAX steps have been executed.\n\
+  \  -v, --version     Display the program version and exit.\n"
