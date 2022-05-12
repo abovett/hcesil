@@ -10,6 +10,7 @@ import Text.Printf
 
 import Common
   ( Address
+  , CodeLine(..)
   , Instruction(..)
   , LineNo
   , OpCode(..)
@@ -52,8 +53,18 @@ runProgram pr dv pars = do
 execute :: Computer -> Params -> ExceptT String IO Computer
 execute comp pars = do
   liftEither $ checkPC comp
-  (comp', output) <- liftEither $ step comp
+  let instr = program comp ! (fromIntegral . pc $ comp)
+  (comp', output) <- liftEither $ step instr comp
+  liftIO $
+    if trace pars
+      then putStrLn $ traceFmt instr comp' pars
+      else return ()
   liftIO $ putStr output
+  -- If tracing, always put a newline after any output without one.
+  liftIO $
+    if ((trace pars) && (not $ null output) && (last output /= '\n'))
+      then putStrLn ""
+      else return ()
   case () of
     _
       | halted comp' -> return comp'
@@ -64,9 +75,7 @@ execute comp pars = do
         return comp'
       | otherwise -> execute comp' pars
 
--- Check program counter is in range. It shouldn't be possible for it
--- to go out of range unless compilation has gone wrong somehow, but
--- check just in case.
+-- Check program counter is in range.
 checkPC :: Computer -> Either String ()
 checkPC comp =
   if pc comp >= (toInteger . length . program $ comp) || pc comp < 0
@@ -74,10 +83,10 @@ checkPC comp =
     else Right ()
 
 -- Execute a single step/cycle
-step :: Computer -> Either String (Computer, String)
-step comp = do
-  let Instruction lineNo opCode operand =
-        program comp ! (fromIntegral . pc $ comp)
+step :: Instruction -> Computer -> Either String (Computer, String)
+step instr comp = do
+  let Instruction cl opCode operand = instr
+      CodeLine lineNo _ _ _ = cl
       comp' = comp {pc = pc comp + 1, steps = steps comp + 1}
   case opCode of
     IN ->
@@ -144,3 +153,11 @@ getVal (ValueOperand (Right s)) comp lineNo =
     Just n -> Right n
     Nothing ->
       Left $ "Unknown variable: '" ++ s ++ "' at line " ++ show lineNo ++ "\n"
+
+-- Format output for trace
+traceFmt :: Instruction -> Computer -> Params -> String
+traceFmt instr comp pars =
+  let Instruction cl opCode operand = instr
+      CodeLine lineNo label op par = cl
+      a = acc comp
+   in printf "%6d: %-10s %-10s %-10s A=%d" lineNo label op par a

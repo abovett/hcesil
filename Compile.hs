@@ -63,13 +63,13 @@ compileCode cl jt = foldr (\c code -> compileInst c jt : code) [] cl
 
 -- Compile a single instruction
 compileInst :: CodeLine -> JumpTable -> Either String Instruction
-compileInst (CodeLine lineNo _ "" _) jumpTable =
-  Right $ Instruction lineNo NoOp NoOperand
-compileInst (CodeLine lineNo _ instr pstr) jumpTable =
+compileInst cl@(CodeLine lineNo _ "" _) jumpTable =
+  Right $ Instruction cl NoOp NoOperand
+compileInst cl@(CodeLine lineNo _ instr pstr) jumpTable =
   case Map.lookup instr instructionDefs of
     Just (opcode, parser) ->
       case parser pstr jumpTable of
-        Right opa -> Right $ Instruction lineNo opcode opa
+        Right opa -> Right $ Instruction cl opcode opa
         Left err -> composeError err
     Nothing -> composeError $ "Unknown instruction: " ++ instr
   where

@@ -1,20 +1,12 @@
 -- Scan a CESIL source file and return its parts in a structured form.
 module ScanSource
   ( scanSource
-  , CodeLine(CodeLine)
   , DataLine(DataLine)
   ) where
 
 import Data.Char
 
-import Common (LineNo)
-
--- Define some types
--- A scanned line of source comprising line number, label, instruction
--- and operand.
-data CodeLine =
-  CodeLine LineNo String String String
-  deriving (Show)
+import Common (CodeLine(..), LineNo)
 
 -- A scanned data line with line number
 data DataLine =

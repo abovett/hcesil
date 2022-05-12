@@ -3,6 +3,7 @@ module Common
   ( Params(..)
   , LineNo
   , Address
+  , CodeLine(..)
   , Instruction(..)
   , OpCode(..)
   , Operand(..)
@@ -16,6 +17,7 @@ data Params =
     , version :: Bool
     , countSteps :: Bool
     , maxSteps :: Maybe Integer
+    , trace :: Bool
     }
   deriving (Show)
 
@@ -24,9 +26,15 @@ type LineNo = Integer
 
 type Address = Integer
 
+-- A scanned line of source comprising line number, label, instruction
+-- and operand.
+data CodeLine =
+  CodeLine LineNo String String String
+  deriving (Show)
+
 -- Define a "compiled" instruction
 data Instruction =
-  Instruction LineNo OpCode Operand
+  Instruction CodeLine OpCode Operand
   deriving (Show)
 
 -- Define instructions

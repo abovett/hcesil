@@ -19,6 +19,7 @@ parseArgs args =
           , version = False
           , countSteps = False
           , maxSteps = Nothing
+          , trace = False
           }
    in argParser args pars
 
@@ -36,6 +37,7 @@ argParser (a:ra) pars = do
           Right (ra, pars {countSteps = True})
         | a `elem` ["-m", "--maxsteps"] ->
           (\n -> (tail ra, pars {maxSteps = Just n})) <$> (getPosInt a ra)
+        | a `elem` ["-t", "--trace"] -> Right (ra, pars {trace = True})
         | (head a) == '-' -> Left $ "Unrecognised option: " ++ a
         | null . filename $ pars -> Right (ra, pars {filename = Just a})
         | otherwise -> Left $ "Unexpected argument: " ++ a
@@ -62,4 +64,5 @@ helpText =
   \  -h, --help        Display this help text and exit.\n\
   \  -m MAX, --maxsteps MAX\n\
   \                    Halt the program after MAX steps have been executed.\n\
+  \  -t, --trace       Display instructions and status as the program runs.\n\
   \  -v, --version     Display the program version and exit.\n"

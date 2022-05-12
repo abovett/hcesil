@@ -9,7 +9,7 @@ import Compile
 import Execute
 import ParseArgs
 
-progVersion = "hcesil version 1.1.0"
+progVersion = "hcesil version 1.2.0"
 
 -- Top level of program
 main :: IO ()
