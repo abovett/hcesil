@@ -93,7 +93,7 @@ step instr comp = do
       if null $ dataVals comp
         then Left $ "Data exhausted at line " ++ show lineNo ++ "\n"
         else let a:dv = dataVals comp
-              in Right (comp {acc = a, dataVals = dv, pc = pc comp + 1}, "")
+              in Right (comp' {acc = a, dataVals = dv}, "")
     OUT -> Right (comp', printf "%8d" $ acc comp)
     LINE -> Right (comp', "\n")
     PRINT ->
@@ -159,5 +159,14 @@ traceFmt :: Instruction -> Computer -> Params -> String
 traceFmt instr comp pars =
   let Instruction cl opCode operand = instr
       CodeLine lineNo label op par = cl
-      a = acc comp
-   in printf "%6d: %-10s %-10s %-10s A=%d" lineNo label op par a
+      st = if opCode == NoOp
+           then ""
+           else show $ steps comp
+      s =
+        case () of
+          _
+            | opCode `elem` [LOAD, ADD, SUBTRACT, MULTIPLY, DIVIDE, IN] ->
+              printf "  Accumulator = %d" (acc comp)
+            | opCode == STORE -> printf "  %s = %d" par (acc comp)
+            | otherwise -> ""
+   in printf "%-8s line %-6d %-10s %-10s %-10s %s" st lineNo label op par s

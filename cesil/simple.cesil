@@ -2,16 +2,16 @@
         PRINT   "Starting"
         LINE
         LOAD    0
-        STORE   ACC
+        STORE   SUM
 LOOP
         IN
         JINEG   END
-        ADD     ACC
-        STORE   ACC
+        ADD     SUM
+        STORE   SUM
         JUMP    LOOP
 
 * End of the program
-END     LOAD    ACC
+END     LOAD    SUM
         OUT
         LINE
         PRINT   "Done"

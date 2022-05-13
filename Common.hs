@@ -54,7 +54,7 @@ data OpCode
   | JIZERO
   | JINEG
   | NoOp
-  deriving (Show)
+  deriving (Show, Eq)
 
 -- Define operand types
 data Operand
