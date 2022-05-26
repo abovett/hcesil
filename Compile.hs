@@ -83,14 +83,12 @@ parseNoOperand p _ = Left $ "Unexpected operand: " ++ p
 parseValueOperand :: String -> JumpTable -> Either String Operand
 parseValueOperand "" _ = Left "Missing parameter"
 parseValueOperand p _
-  | isDigit $ head p =
-    case readMaybe p :: Maybe Integer of
-      Just n -> Right $ ValueOperand $ Left n
-      Nothing -> Left $ "Invalid number: " ++ p
+  | isValidSymbolName p =
+      Right $ ValueOperand $ Right p
   | otherwise =
-    if isValidSymbolName p
-      then Right $ ValueOperand $ Right p
-      else Left $ "Invalid symbol name: " ++ p
+    case readMaybeSigned p :: Maybe Integer of
+      Just n -> Right $ ValueOperand $ Left n
+      Nothing -> Left $ "Invalid operand: " ++ p
 
 parseSymbolOperand :: String -> JumpTable -> Either String Operand
 parseSymbolOperand "" _ = Left "Missing parameter"
@@ -124,7 +122,15 @@ getDataValues :: [DataLine] -> [Either String Integer]
 getDataValues dl = foldr (\d dVals -> parseData d : dVals) [] dl
   where
     parseData (DataLine lineNo s) =
-      case readMaybe s :: Maybe Integer of
+      case readMaybeSigned s :: Maybe Integer of
         Just v -> Right v
         Nothing ->
           Left $ "Line " ++ show lineNo ++ ": " ++ "Invalid data: " ++ s
+
+-- Read a value with an optional leading + or - sign.
+readMaybeSigned :: (Read a, Num a) => String -> Maybe a
+readMaybeSigned s =
+  let s' = case s of
+        '+':xs -> xs
+        otherwise -> s
+  in readMaybe s'

@@ -1,0 +1,42 @@
+* Check CESIL interpreter handles signed numbers correctly
+
+*       First some immediate operands
+        LOAD            +0
+        ADD             +10
+        SUBTRACT        -10
+        ADD             -0
+        ADD             10
+        PRINT           "This should be 30: "
+        OUT
+        SUBTRACT        30
+        JIZERO          OK1
+        PRINT           " *** FAILED"
+OK1     LINE
+
+*       Now some data values
+        LOAD            0
+        STORE           TOTAL
+        IN
+LOOP
+        SUBTRACT        1
+        JINEG           DONE
+        STORE           COUNT
+        IN
+        ADD             TOTAL
+        STORE           TOTAL
+        LOAD            COUNT
+        JUMP            LOOP
+DONE
+        LOAD            TOTAL
+        PRINT           "This should be 500: "
+        OUT
+        SUBTRACT        500
+        JIZERO          OK2
+        PRINT           "*** FAILED"
+OK2     LINE
+        HALT
+        %
+        3
+        -100
+        +200
+        400

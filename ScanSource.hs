@@ -41,6 +41,7 @@ isCommentOrBlank :: String -> Bool
 isCommentOrBlank sLine
   | dropWhile isSpace sLine == "" = True
   | head sLine == '*' = True
+  | head sLine == '(' = True
   | otherwise = False
 
 -- Is this the start of the data i.e. does this line contain a single %?

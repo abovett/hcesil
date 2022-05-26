@@ -55,7 +55,7 @@ argParser (a:ra) pars = do
 
 -- Define help text
 helpText =
-  "Usage: hcesil [FLAGS] FILE\n\
+  "Usage: hcesil [OPTIONS] FILE\n\
   \Execute CESIL program FILE.\n\
   \\n\
   \OPTIONS are:\n\
