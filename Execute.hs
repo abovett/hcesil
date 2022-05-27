@@ -1,4 +1,6 @@
--- Functions for executing the compiled CESIL code
+-- hcesil - Functions for executing the compiled CESIL code
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 module Execute
   ( runProgram
   ) where

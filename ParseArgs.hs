@@ -1,4 +1,6 @@
--- Command line parser
+-- hcesil command line parser
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 module ParseArgs
   ( Params(..)
   , parseArgs
@@ -65,4 +67,5 @@ helpText =
   \  -m MAX, --maxsteps MAX\n\
   \                    Halt the program after MAX steps have been executed.\n\
   \  -t, --trace       Display instructions and status as the program runs.\n\
-  \  -v, --version     Display the program version and exit.\n"
+  \  -v, --version     Display the program version and license information,\n\
+  \                      and exit.\n"

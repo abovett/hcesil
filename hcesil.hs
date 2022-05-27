@@ -1,4 +1,6 @@
--- CESIL interpreter top level
+-- hcesil - a CESIL interpreter
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 import Control.Exception
 import Control.Monad.Except
 import Control.Monad.Trans.Maybe
@@ -9,7 +11,13 @@ import Compile
 import Execute
 import ParseArgs
 
-progVersion = "hcesil version 1.3.0"
+progVersion =
+  "hcesil version 1.4.0\n\
+  \Copyright (C) 2022 Andrew Bovett.\n\
+  \License GPLv3: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\n\
+  \This is free software: you are free to change and redistribute it\n\
+  \under the terms of the above license.\n\
+  \There is NO WARRANTY, to the extent permitted by law."
 
 -- Top level of program
 main :: IO ()

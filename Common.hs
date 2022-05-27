@@ -1,4 +1,6 @@
--- Common definitions used in compilation and execution phases.
+-- hcesil - Common definitions used in compile and execute phases.
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 module Common
   ( Params(..)
   , LineNo

@@ -1,4 +1,7 @@
--- Scan a CESIL source file and return its parts in a structured form.
+-- hcesil - Scan a CESIL source file and return its parts in a
+-- structured form.
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 module ScanSource
   ( scanSource
   , DataLine(DataLine)

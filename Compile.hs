@@ -1,5 +1,7 @@
--- Functions for "compiling" the scanned CESIL code lines into an
--- executable representation.
+-- hcesil - Functions for "compiling" the scanned CESIL code lines
+-- into an executable representation.
+-- (C) Andrew Bovett 2022
+-- License: GPLv3
 module Compile
   ( compile
   ) where
