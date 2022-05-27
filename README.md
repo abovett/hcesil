@@ -20,12 +20,14 @@ hcesil [OPTIONS] FILE
 Execute CESIL program FILE.
 
 OPTIONS are:
-  -c, --countsteps   Count the steps executed and report at program completion.
+  -c, --countsteps   Count the steps executed and report at program
+                       completion.
   -h, --help         Display this help text and exit.
   -m MAX, --maxsteps MAX
                      Halt the program after MAX steps have been executed.
   -t, --trace        Display instructions and status as the program runs.
-  -v, --version      Display the program version and exit.
+  -v, --version      Display the program version and license information,
+                       and exit.
 ```
 
 Compatibility
